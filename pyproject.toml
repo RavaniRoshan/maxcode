@@ -1,0 +1,86 @@
+[build-system]
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
+[project]
+name = "maxcode"
+version = "0.1.0"
+description = "An open-source terminal coding agent that marks a task done only after checks pass."
+readme = "README.md"
+license = "Apache-2.0"
+license-files = ["LICENSE", "NOTICE"]
+requires-python = ">=3.12"
+authors = [{ name = "maxcode contributors" }]
+keywords = ["coding-agent", "cli", "verifier", "open-source"]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Environment :: Console",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: Apache Software License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.12",
+  "Topic :: Software Development :: Quality Assurance",
+]
+dependencies = [
+  "httpx>=0.27",
+  "pydantic>=2.9",
+  "typer>=0.12.5",
+]
+
+[project.scripts]
+maxcode = "maxcode.cli:app"
+
+[project.urls]
+Homepage = "https://github.com/roshanravani/maxcode"
+Documentation = "https://github.com/roshanravani/maxcode/tree/main/site"
+Issues = "https://github.com/roshanravani/maxcode/issues"
+
+[dependency-groups]
+dev = [
+  "mypy>=1.13",
+  "pytest>=8.3",
+  "pytest-cov>=5.0",
+  "ruff>=0.8",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/maxcode"]
+
+[tool.hatch.build.targets.sdist]
+include = [
+  "/src",
+  "/tests",
+  "/README.md",
+  "/LICENSE",
+  "/NOTICE",
+  "/CHANGELOG.md",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+files = ["src"]
+warn_unused_ignores = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = [
+  "slow: tests that need a real provider or the real engine; skipped without credentials",
+]
+filterwarnings = ["error"]
+
+[tool.coverage.run]
+source = ["src/maxcode"]
+omit = ["src/maxcode/bench/*"]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = true

@@ -1,0 +1,28 @@
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+
+# Test and lint caches
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+coverage.xml
+
+# maxcode runtime data
+.maxcode/
+
+# Environment and secrets
+.env
+.env.*
+*.pem
+*.key
+
+# Editor and OS files
+.idea/
+.vscode/
+.DS_Store

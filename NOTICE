@@ -1,0 +1,24 @@
+OpenAI Codex
+Copyright 2025 OpenAI
+
+This project includes code derived from [Ratatui](https://github.com/ratatui/ratatui), licensed under the MIT license.
+Copyright (c) 2016-2022 Florian Dehau
+Copyright (c) 2023-2025 The Ratatui Developers
+
+-------------------------------------------------------------------------------
+
+maxcode
+Copyright 2026 maxcode contributors
+
+maxcode is an independent project. It is not affiliated with, endorsed by, or
+sponsored by OpenAI or Sarvam AI. The Codex CLI is used as an unmodified,
+separately installed engine under the Apache-2.0 license. The maxcode source
+tree contains no Codex source changes.
+
+Runtime dependencies and their licenses:
+- Typer: MIT
+- httpx: BSD-3-Clause
+- pydantic: MIT
+
+The full license texts of dependencies are available in the lock file's
+package metadata and in each package distribution.
