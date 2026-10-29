@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>maxcode</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <nav>
+      <a href="index.html">maxcode</a>
+      <a href="docs.html">Docs</a>
+      <a href="benchmark.html">Benchmark</a>
+      <a href="github.html">GitHub</a>
+    </nav>
+  </header>
+  <main>
+    <h1>maxcode</h1>
+    <p class="lead">A terminal coding agent that marks a task done only after checks pass.</p>
+    <section>
+      <h2>The problem</h2>
+      <p>Coding tools often report a task as done when it is not done. The user finds the failure by hand.</p>
+    </section>
+    <section>
+      <h2>The verifier loop</h2>
+      <p>A planner splits the task into steps. A worker edits files for one step. A verifier runs tests, builds, and lint commands. A step is done only when every check passes. Every step starts from a git checkpoint.</p>
+    </section>
+    <section>
+      <h2>Install in 60 seconds</h2>
+      <pre><code>git clone https://github.com/roshanravani/maxcode.git
+cd maxcode
+uv sync
+uv run maxcode --help</code></pre>
+    </section>
+  </main>
+  <footer>Apache-2.0 licensed.</footer>
+</body>
+</html>

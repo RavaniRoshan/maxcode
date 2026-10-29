@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Docs - maxcode</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <nav>
+      <a href="index.html">maxcode</a>
+      <a href="docs.html">Docs</a>
+      <a href="benchmark.html">Benchmark</a>
+      <a href="github.html">GitHub</a>
+    </nav>
+  </header>
+  <main>
+    <h1>Docs</h1>
+    <h2>Configure</h2>
+    <p>Create <code>maxcode.toml</code> in your project with a provider, one model for the planner, one model for the worker, and limits.</p>
+    <h2>Commands</h2>
+    <ul>
+      <li><code>maxcode run TASK</code> - plan, edit, and verify.</li>
+      <li><code>maxcode plan TASK</code> - show the plan and stop.</li>
+      <li><code>maxcode undo</code> - restore the last checkpoint.</li>
+      <li><code>maxcode cost [RUN_ID]</code> - show the cost of a run.</li>
+      <li><code>maxcode bench</code> - run the benchmark suite.</li>
+    </ul>
+    <h2>Checks</h2>
+    <p>maxcode detects test, build, and lint commands for Python, Node, Rust, and Go repositories.</p>
+  </main>
+  <footer>Apache-2.0 licensed.</footer>
+</body>
+</html>
