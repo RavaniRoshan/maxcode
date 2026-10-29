@@ -9,11 +9,13 @@ import signal
 import subprocess
 import time
 from collections.abc import Iterable, Iterator
-from pathlib import Path
+from pathlib import Path, PurePosixPath
+from typing import Any
 
+from maxcode.checkpoints import diff_stats
 from maxcode.config import Config
 from maxcode.errors import CheckError
-from maxcode.schemas import CheckResult
+from maxcode.schemas import CheckResult, StepVerification
 
 NAMED_CHECKS = ("test", "build", "lint")
 OUTPUT_LIMIT = 4000
@@ -185,4 +187,59 @@ def run_check(name: str, cmd: str, repo: str | Path, timeout_s: float) -> CheckR
         exit_code=exit_code,
         output_tail=text[-OUTPUT_LIMIT:],
         seconds=seconds,
+    )
+
+
+def _protected_violation(path: str, cfg: Config, edits_tests: bool) -> bool:
+    posix = PurePosixPath(path)
+    for pattern in cfg.protected.paths:
+        if posix.match(pattern):
+            return True
+    for pattern in cfg.protected.test_paths:
+        if posix.match(pattern):
+            return not edits_tests
+    return False
+
+
+def verify_step(
+    step: Any,
+    cfg: Config,
+    repo: str | Path,
+    checkpoint_ref: str,
+    detected: dict[str, str],
+    timeout_s: float = 300.0,
+) -> StepVerification:
+    from maxcode.schemas import StepVerification
+
+    changed_files, diff_lines = diff_stats(checkpoint_ref, repo)
+    violations = [
+        path for path in changed_files if _protected_violation(path, cfg, step.edits_tests)
+    ]
+    resolved = resolve_checks(step.checks, cfg, detected)
+    results = [run_check(name, command, repo, timeout_s) for name, command in resolved]
+    failure_parts: list[str] = []
+    passed = True
+    if violations:
+        passed = False
+        failure_parts.append("protected path changed: " + ", ".join(violations))
+    if diff_lines > cfg.limits.max_diff_lines:
+        passed = False
+        failure_parts.append(
+            f"diff exceeds limit: {diff_lines} > {cfg.limits.max_diff_lines}"
+        )
+    for result in results:
+        if not result.passed:
+            passed = False
+            failure_parts.append(f"{result.name}: {result.output_tail}")
+    unverified = len(resolved) == 0
+    if unverified:
+        passed = False
+    return StepVerification(
+        step_id=step.id,
+        passed=passed and not unverified,
+        diff_lines=diff_lines,
+        results=results,
+        changed_files=changed_files,
+        unverified=unverified,
+        failure_output="\n".join(failure_parts),
     )

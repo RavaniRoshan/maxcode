@@ -4,7 +4,6 @@
 
 import os
 import subprocess
-import uuid
 from pathlib import Path
 
 from maxcode.errors import CheckpointError, NotAGitRepo
@@ -35,10 +34,14 @@ def _run(args: list[str], repo: Path, env: dict[str, str], *, check: bool = True
     return result
 
 
-def _temp_index(repo: Path) -> Path:
-    directory = repo / ".maxcode" / "tmp"
-    directory.mkdir(parents=True, exist_ok=True)
-    return directory / f"index-{os.getpid()}-{uuid.uuid4().hex}"
+def _temp_index() -> Path:
+    import tempfile
+
+    fd, name = tempfile.mkstemp(prefix="maxcode-index-", suffix=".lock")
+    os.close(fd)
+    path = Path(name)
+    path.unlink(missing_ok=True)
+    return path
 
 
 def _git_env(repo: Path, index_path: Path) -> dict[str, str]:
@@ -105,7 +108,7 @@ def create(run_id: str, step_id: int, repo: str | Path = ".") -> str:
     """Save the working tree as a commit under refs/maxcode/ and return its ref."""
     root = Path(repo).resolve()
     _ensure_git(root)
-    index_path = _temp_index(root)
+    index_path = _temp_index()
     env = _git_env(root, index_path)
     try:
         head = _read_head_commit(root, env)
@@ -174,7 +177,7 @@ def restore(ref: str, repo: str | Path = ".") -> None:
     """Restore tracked and untracked files to the state saved in ref."""
     root = Path(repo).resolve()
     _ensure_git(root)
-    index_path = _temp_index(root)
+    index_path = _temp_index()
     env = _git_env(root, index_path)
     try:
         _run(["read-tree", ref], root, env)
@@ -236,7 +239,7 @@ def diff_stats(ref: str, repo: str | Path = ".") -> tuple[list[str], int]:
     """Return changed files and added plus removed lines since ref."""
     root = Path(repo).resolve()
     _ensure_git(root)
-    index_path = _temp_index(root)
+    index_path = _temp_index()
     env = _git_env(root, index_path)
     try:
         _run(["read-tree", ref], root, env)
