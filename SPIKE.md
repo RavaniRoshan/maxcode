@@ -88,8 +88,8 @@ The only captured field not named in the schema is `client_metadata`. The reques
 The source-built binary is used through `codex exec`:
 
 ```bash
-CODEX_HOME="$RUN_DIR/codex-home" \
-  "$CODEX_BIN" exec \
+MAXCODE_HOME="$RUN_DIR/maxcode-home" \
+  "$ENGINE_BIN" exec \
   --json \
   --skip-git-repo-check \
   -C "$REPO" \
