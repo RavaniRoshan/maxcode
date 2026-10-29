@@ -9,7 +9,7 @@ Status: Complete (wrapper decision; live runs skipped by user). Codex `v0.165.0`
 
 ## 1. Wrapper or fork
 
-Provisional decision: **wrapper**.
+Decision: **fork** (minimal). The wrapper approach was provisional; the project now ships a minimal fork named `maxcode-engine` built from Codex v0.165.0.
 
 Codex supports user-defined OpenAI-compatible providers through `model_providers.<id>` in the user config, and the provider can be selected with `model_provider`. The provider entry supports `base_url`, `env_key`, and `wire_api`. No Codex source change is needed to point it at a custom URL.
 

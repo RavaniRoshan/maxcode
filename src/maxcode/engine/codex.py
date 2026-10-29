@@ -17,15 +17,16 @@ from maxcode.schemas import EngineResult
 
 
 def _binary() -> str:
-    override = os.environ.get("MAXCODE_CODEX_BIN")
+    override = os.environ.get("MAXCODE_ENGINE_BIN") or os.environ.get("MAXCODE_CODEX_BIN")
     if override:
         return override
-    found = shutil.which("codex")
-    if found:
-        return found
+    for candidate in ("maxcode-engine", "codex"):
+        found = shutil.which(candidate)
+        if found:
+            return found
     raise EngineError(
         "The Codex engine binary was not found.",
-        "maxcode looks for 'codex' on PATH or in MAXCODE_CODEX_BIN.",
+        "maxcode looks for 'maxcode-engine' (or 'codex') on PATH, or in MAXCODE_ENGINE_BIN.",
         "Install Codex, or set MAXCODE_CODEX_BIN to the binary path.",
     )
 
