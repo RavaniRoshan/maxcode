@@ -1,18 +1,35 @@
 # maxcode
 
-maxcode is an open-source terminal coding agent. It plans a task, edits code,
-and marks the task done only after an independent set of checks passes.
+[![CI](https://github.com/RavaniRoshan/maxcode/actions/workflows/ci.yml/badge.svg)](https://github.com/RavaniRoshan/maxcode/actions/workflows/ci.yml)
+[![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 
-- **Planner** turns one task into small, ordered steps.
-- **Worker** edits files for one step at a time.
-- **Verifier** runs tests, builds, and lint commands. It ignores what the worker
-  says and decides pass or fail from real command output.
+**maxcode** is an open-source terminal coding agent. It plans a task, edits code
+with an engine, and marks the task done **only after an independent set of checks
+passes**.
 
-Every step starts from a git checkpoint, every run writes a JSONL log, and every
-run reports token use and cost. `maxcode undo` restores the last checkpoint.
+> Forked from the Codex CLI (Apache-2.0). maxcode is an independent project and
+> is not affiliated with, endorsed by, or sponsored by OpenAI or Sarvam AI.
 
-maxcode is an independent project. It is not affiliated with, endorsed by, or
-sponsored by OpenAI or Sarvam AI.
+## Why maxcode
+
+Most coding tools report a task as done when it is not done. The user finds the
+failure by hand. maxcode adds a verifier loop: a planner splits the task into
+steps, a worker edits files for one step, and a verifier runs tests, builds, and
+lint commands. A step is done only when every check passes. Every step starts
+from a git checkpoint, every run writes a JSONL log, and every run reports token
+use and cost.
+
+## Features
+
+- **Planner / Worker / Verifier** roles with a retry loop (default 3 tries).
+- **Git checkpoints** under `refs/maxcode/` and a one-command `undo`.
+- **OpenAI-compatible provider** layer (any endpoint, including open-weight models).
+- **Cost and token reporting**, including partial results when counts are missing.
+- **JSONL run logs** for reproducible evidence.
+- **Check detection** for Python, Node, Rust, and Go repositories.
+- **Benchmark runner** with 20 tasks and a report script.
+- **Four-page static site** hosted on GitHub Pages.
+- No API key is ever stored; keys come from environment variables only.
 
 ## Requirements
 
@@ -24,7 +41,7 @@ sponsored by OpenAI or Sarvam AI.
 ## Install
 
 ```bash
-git clone https://github.com/roshanravani/maxcode.git
+git clone https://github.com/RavaniRoshan/maxcode.git
 cd maxcode
 uv sync
 uv run maxcode --help
@@ -53,8 +70,6 @@ max_cost_usd_per_task = 2.00
 max_diff_lines        = 400
 max_steps             = 12
 ```
-
-Set the key in your shell:
 
 ```bash
 export OPENROUTER_API_KEY=...
@@ -92,8 +107,8 @@ TOML
 uv run --project .. maxcode run "fix add so the test passes"
 ```
 
-The run ends with exit code 0 only after `tests/test_app.py` passes. If a step
-fails, run `uv run --project .. maxcode undo`.
+The run exits 0 only after `tests/test_app.py` passes. If a step fails, run
+`uv run --project .. maxcode undo` to restore the last checkpoint.
 
 ## Commands
 
@@ -105,13 +120,13 @@ fails, run `uv run --project .. maxcode undo`.
 | `maxcode cost [RUN_ID]` | Show the cost of a run. |
 | `maxcode bench` | Run the benchmark suite. |
 
-Options: `run --yes`, `run --config PATH`, `run --max-cost USD`, `plan --config PATH`,
-`bench --verifier on|off`, `bench --suite PATH`.
+Options: `run --yes`, `run --config PATH`, `run --max-cost USD`,
+`plan --config PATH`, `bench --verifier on|off`, `bench --suite PATH`.
 
 ## Benchmark
 
-The benchmark runs 20 small tasks twice: once with the verifier on and once with
-it off. Results and logs are written under `.maxcode/bench/`.
+Twenty small tasks, run twice: once with the verifier on and once with it off.
+Results and logs are written under `.maxcode/bench/`.
 
 ```bash
 maxcode bench --verifier on
@@ -120,7 +135,12 @@ uv run python -m maxcode.bench.report .maxcode/bench
 ```
 
 The report prints pass rate, cost per completed task, and the unverified count.
-Published logs live in the repository under the benchmark output directory.
+
+## Engine
+
+maxcode calls an engine as a child process. By default it looks for
+`maxcode-engine` on `PATH`, then falls back to `codex`. Set `MAXCODE_ENGINE_BIN`
+to override the binary path. The engine is a minimal fork of the Codex CLI.
 
 ## Development
 
@@ -131,7 +151,18 @@ uv run ruff check .
 uv run mypy src
 ```
 
+## Project layout
+
+See `PRD.md` section 20. Source lives in `src/maxcode/`, tests in `tests/`,
+and the marketing site in `site/`.
+
 ## Legal
 
 Apache-2.0. See `LICENSE` and `NOTICE`. maxcode is an independent project and
-is not affiliated with OpenAI or Sarvam AI.
+is not affiliated with OpenAI or Sarvam AI. Trademark and legal review are tracked
+in `docs/LEGAL.md`.
+
+## Status
+
+Version 0.1. Live runs on open-weight models require an OpenRouter (or
+compatible) API key and are recorded in `SPIKE.md`.
