@@ -41,5 +41,9 @@ class CheckpointError(MaxcodeError):
     """A git checkpoint could not be created or restored."""
 
 
+class RunLogError(MaxcodeError):
+    """A run log file could not be read or validated."""
+
+
 class NotAGitRepo(CheckpointError):
     """The working directory is not inside a git repository."""
