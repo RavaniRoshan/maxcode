@@ -1,0 +1,7 @@
+{
+  "id": "task-017",
+  "repo_url": "https://github.com/pallets/click.git",
+  "commit": "2247b35ea1c47c727d7a06e51fa280e12a863ff6",
+  "task": "Ensure the project's test suite passes. Do not weaken or delete tests.",
+  "score": "python -m pytest tests/test_basic.py -q"
+}

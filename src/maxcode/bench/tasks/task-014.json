@@ -1,0 +1,7 @@
+{
+  "id": "task-014",
+  "repo_url": "https://github.com/pallets/itsdangerous.git",
+  "commit": "672971d66a2ef9f85151e53283113f33d642dabd",
+  "task": "Ensure the project's test suite passes. Do not weaken or delete tests.",
+  "score": "python -m pytest tests/ -q"
+}

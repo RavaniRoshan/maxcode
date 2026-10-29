@@ -1,0 +1,7 @@
+{
+  "id": "task-019",
+  "repo_url": "https://github.com/pallets/markupsafe.git",
+  "commit": "4e111271b1494995708a9e878a10829b5e10c7ba",
+  "task": "Ensure the project's test suite passes. Do not weaken or delete tests.",
+  "score": "python -m pytest tests/ -q"
+}

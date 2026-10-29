@@ -1,0 +1,7 @@
+{
+  "id": "task-016",
+  "repo_url": "https://github.com/psf/requests.git",
+  "commit": "3c7baaa05ab4aa49cc819ce3a819d260de19c157",
+  "task": "Ensure the project's test suite passes. Do not weaken or delete tests.",
+  "score": "python -m pytest tests/test_requests.py -q"
+}
