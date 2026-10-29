@@ -222,3 +222,25 @@ def test_bench_success_exits_0(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) 
     )
     result = runner.invoke(app, ["bench", "--verifier", "on"])
     assert result.exit_code == 0
+
+
+def test_cost_partial_word(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    init_repo(tmp_path)
+    monkeypatch.setattr("maxcode.cli.load_config", lambda path=None: fake_config())
+    from maxcode.runlog import RunLog
+
+    run_dir = tmp_path / ".maxcode" / "runs" / "run2"
+    run_dir.mkdir(parents=True)
+    log = RunLog(run_dir / "log.jsonl", "run2")
+    log.write(
+        "worker_call",
+        {"model": "m", "input_tokens": None, "output_tokens": 5, "seconds": 1.0},
+    )
+    log.write(
+        "run_end",
+        {"passed": True, "steps_done": 1, "cost_usd": 0.0, "tokens_in": 0, "tokens_out": 5},
+    )
+    result = runner.invoke(app, ["cost"])
+    assert result.exit_code == 0
+    assert "partial" in result.output.lower()
