@@ -132,7 +132,7 @@ max_steps             = 12</code></pre>
 
       <div class="doc-section" id="benchmark">
         <h2>Benchmark method</h2>
-        <p>The harness runs a fixed task suite twice: once with the verifier enabled and once with it disabled. Each run records the diff, check output, tokens, cost, and final state.</p>
+        <p>The harness runs a fixed task suite twice: once with the verifier enabled and once with it disabled. Each run records changed-file line counts, check output, tokens, cost, and final state.</p>
         <div class="code-block">
           <pre><code id="doc-bench">maxcode bench --verifier on
 maxcode bench --verifier off
