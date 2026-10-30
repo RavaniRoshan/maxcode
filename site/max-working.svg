@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-2 -2 16 18" width="192" height="216" role="img" aria-label="Max working">
+  <g shape-rendering="crispEdges">
+    <rect x="1" y="3" width="10" height="9" fill="#D9DEE5"/>
+    <rect x="1" y="3" width="10" height="1" fill="#FFFFFF"/>
+    <rect x="10" y="4" width="1" height="8" fill="#AEB6C2"/>
+    <rect x="1" y="11" width="10" height="1" fill="#AEB6C2"/>
+    <rect x="2" y="12" width="2" height="1" fill="#8D99AB"/>
+    <rect x="8" y="12" width="2" height="1" fill="#8D99AB"/>
+    <rect x="4" y="5" width="1" height="2" fill="#0A0F1E"/>
+    <rect x="9" y="5" width="1" height="2" fill="#0A0F1E"/>
+    <rect x="5" y="9" width="2" height="1" fill="#0A0F1E"/>
+    <g fill="#94A3B8">
+      <rect x="4" y="1" width="1" height="1"><animate attributeName="opacity" values="0.2;1;0.2" dur="1.2s" begin="0s" repeatCount="indefinite"/></rect>
+      <rect x="6" y="1" width="1" height="1"><animate attributeName="opacity" values="0.2;1;0.2" dur="1.2s" begin="0.2s" repeatCount="indefinite"/></rect>
+      <rect x="8" y="1" width="1" height="1"><animate attributeName="opacity" values="0.2;1;0.2" dur="1.2s" begin="0.4s" repeatCount="indefinite"/></rect>
+    </g>
+  </g>
+</svg>

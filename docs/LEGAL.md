@@ -1,8 +1,8 @@
 # Legal checklist
 
-- [x] L1: LICENSE and NOTICE files are present and are the Codex Apache-2.0 files.
+- [x] L1: LICENSE and NOTICE files are present and are the upstream Apache-2.0 files.
 - [x] L2: Every source file carries an SPDX license header.
-- [x] L3: The product name is maxcode; no Codex name or logo appears in output.
+- [x] L3: The product name is maxcode; no upstream name or logo appears in output.
 - [x] L4: No Sarvam name, logo, copy, image, or font is used.
 - [x] L5: No Sarvam binary was decompiled or inspected.
 - [x] L6: Site copy and assets were written from zero.

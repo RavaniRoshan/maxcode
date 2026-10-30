@@ -1,0 +1,117 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 420" width="960" height="420" role="img" aria-labelledby="t">
+  <title id="t">Max, the maxcode mascot: idle, working, pass, fail</title>
+  <style>
+    .eye { transform-box: fill-box; transform-origin: center; animation: blink 4s infinite; }
+    @keyframes blink { 0%, 92%, 100% { transform: scaleY(1); } 95% { transform: scaleY(0.1); } }
+    .tick { animation: bob 1.6s ease-in-out infinite; }
+    @keyframes bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-0.4px); } }
+    .glow { animation: pulse 3s ease-in-out infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 0.6; } 50% { opacity: 1; } }
+    .cur { animation: cur 1.1s steps(1) infinite; }
+    @keyframes cur { 0%, 55% { opacity: 1; } 56%, 100% { opacity: 0; } }
+    @media (prefers-reduced-motion: reduce) { .eye, .tick, .glow, .cur { animation: none; } }
+    text { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+  </style>
+
+  <defs>
+    <radialGradient id="glow-grad" cx="50%" cy="50%" r="50%">
+      <stop offset="0" stop-color="#BEE6FF" stop-opacity="0.5"/>
+      <stop offset="0.6" stop-color="#BEE6FF" stop-opacity="0.16"/>
+      <stop offset="1" stop-color="#BEE6FF" stop-opacity="0"/>
+    </radialGradient>
+    <g id="glow-soft"><circle class="glow" cx="6" cy="8" r="8" fill="url(#glow-grad)"/></g>
+    <g id="glow-strong"><circle cx="6" cy="8" r="8" fill="url(#glow-grad)"/><circle cx="6" cy="8" r="6" fill="url(#glow-grad)"/></g>
+    <g id="base" shape-rendering="crispEdges">
+      <rect x="1" y="3" width="10" height="9" fill="#D9DEE5"/>
+      <rect x="1" y="3" width="10" height="1" fill="#FFFFFF"/>
+      <rect x="10" y="4" width="1" height="8" fill="#AEB6C2"/>
+      <rect x="1" y="11" width="10" height="1" fill="#AEB6C2"/>
+      <rect x="2" y="12" width="2" height="1" fill="#8D99AB"/>
+      <rect x="8" y="12" width="2" height="1" fill="#8D99AB"/>
+    </g>
+    <g id="face-idle" shape-rendering="crispEdges" fill="#0A0F1E">
+      <rect class="eye" x="3" y="5" width="1" height="2"/>
+      <rect class="eye" x="8" y="5" width="1" height="2"/>
+      <rect x="4" y="8" width="1" height="1"/>
+      <rect x="7" y="8" width="1" height="1"/>
+      <rect x="5" y="9" width="2" height="1"/>
+    </g>
+    <g id="face-work" shape-rendering="crispEdges" fill="#0A0F1E">
+      <rect x="4" y="5" width="1" height="2"/>
+      <rect x="9" y="5" width="1" height="2"/>
+      <rect x="5" y="9" width="2" height="1"/>
+    </g>
+    <g id="face-pass" shape-rendering="crispEdges" fill="#0A0F1E">
+      <rect x="2" y="6" width="1" height="1"/>
+      <rect x="3" y="5" width="1" height="1"/>
+      <rect x="4" y="6" width="1" height="1"/>
+      <rect x="7" y="6" width="1" height="1"/>
+      <rect x="8" y="5" width="1" height="1"/>
+      <rect x="9" y="6" width="1" height="1"/>
+      <rect x="4" y="8" width="4" height="1"/>
+      <rect x="5" y="9" width="2" height="1"/>
+    </g>
+    <g id="face-fail" shape-rendering="crispEdges" fill="#0A0F1E">
+      <rect x="3" y="5" width="1" height="1"/>
+      <rect x="4" y="6" width="1" height="1"/>
+      <rect x="3" y="7" width="1" height="1"/>
+      <rect x="8" y="5" width="1" height="1"/>
+      <rect x="7" y="6" width="1" height="1"/>
+      <rect x="8" y="7" width="1" height="1"/>
+      <rect x="4" y="9" width="4" height="1"/>
+    </g>
+    <g id="tick" class="tick" shape-rendering="crispEdges" fill="#FFFFFF"><rect x="8" y="-1" width="1" height="1"/><rect x="9" y="-1" width="1" height="1"/><rect x="3" y="0" width="1" height="1"/><rect x="7" y="0" width="1" height="1"/><rect x="8" y="0" width="1" height="1"/><rect x="3" y="1" width="1" height="1"/><rect x="4" y="1" width="1" height="1"/><rect x="6" y="1" width="1" height="1"/><rect x="7" y="1" width="1" height="1"/><rect x="4" y="2" width="1" height="1"/><rect x="5" y="2" width="1" height="1"/><rect x="6" y="2" width="1" height="1"/></g>
+  </defs>
+
+  <rect width="960" height="420" rx="18" fill="#070B14"/>
+
+  <text x="48" y="64" font-size="30" font-weight="700" fill="#F5F7FA">maxcode</text>
+  <rect class="cur" x="196" y="40" width="16" height="30" fill="#F5F7FA"/>
+  <text x="48" y="92" font-size="14" fill="#8D99AB">meet Max: the cursor that glows only when checks pass.</text>
+
+  <svg x="50" y="104" width="192" height="216" viewBox="-2 -2 16 18">
+    <use href="#glow-soft"/><use href="#base"/><use href="#face-idle"/><use href="#tick"/>
+  </svg>
+  <text x="146" y="346" font-size="16" fill="#F5F7FA" text-anchor="middle">idle</text>
+  <text x="146" y="370" font-size="13" fill="#8D99AB" text-anchor="middle">$ maxcode</text>
+
+  <svg x="280" y="104" width="192" height="216" viewBox="-2 -2 16 18">
+    <use href="#base"/><use href="#face-work"/>
+    <g shape-rendering="crispEdges" fill="#94A3B8">
+      <rect x="4" y="1" width="1" height="1"><animate attributeName="opacity" values="0.2;1;0.2" dur="1.2s" begin="0s" repeatCount="indefinite"/></rect>
+      <rect x="6" y="1" width="1" height="1"><animate attributeName="opacity" values="0.2;1;0.2" dur="1.2s" begin="0.2s" repeatCount="indefinite"/></rect>
+      <rect x="8" y="1" width="1" height="1"><animate attributeName="opacity" values="0.2;1;0.2" dur="1.2s" begin="0.4s" repeatCount="indefinite"/></rect>
+    </g>
+  </svg>
+  <text x="376" y="346" font-size="16" fill="#F5F7FA" text-anchor="middle">working</text>
+  <text x="376" y="370" font-size="13" fill="#8D99AB" text-anchor="middle">step 2/4 ...</text>
+
+  <svg x="510" y="104" width="192" height="216" viewBox="-2 -2 16 18">
+    <use href="#glow-strong"/><use href="#base"/><use href="#face-pass"/><use href="#tick"/>
+    <g shape-rendering="crispEdges" fill="#FFFFFF">
+      <rect x="0" y="1" width="1" height="1"/>
+      <rect x="-1" y="2" width="1" height="1"/>
+      <rect x="1" y="2" width="1" height="1"/>
+      <rect x="0" y="3" width="1" height="1"/>
+    </g>
+  </svg>
+  <text x="606" y="346" font-size="16" fill="#F5F7FA" text-anchor="middle">pass</text>
+  <text x="606" y="370" font-size="13" fill="#8D99AB" text-anchor="middle">all checks passed</text>
+
+  <svg x="740" y="104" width="192" height="216" viewBox="-2 -2 16 18">
+    <use href="#base"/><use href="#face-fail"/>
+    <g shape-rendering="crispEdges" fill="#F87171">
+      <rect x="5" y="-1" width="1" height="1"/>
+      <rect x="7" y="-1" width="1" height="1"/>
+      <rect x="6" y="0" width="1" height="1"/>
+      <rect x="5" y="1" width="1" height="1"/>
+      <rect x="7" y="1" width="1" height="1"/>
+    </g>
+    <g shape-rendering="crispEdges" fill="#7DD3FC">
+      <rect x="11" y="5" width="1" height="1"/>
+      <rect x="11" y="6" width="1" height="1"/>
+    </g>
+  </svg>
+  <text x="836" y="346" font-size="16" fill="#F5F7FA" text-anchor="middle">fail</text>
+  <text x="836" y="370" font-size="13" fill="#8D99AB" text-anchor="middle">retry 3/3, rolled back</text>
+</svg>

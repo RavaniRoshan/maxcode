@@ -3,37 +3,185 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>maxcode</title>
+  <title>maxcode | Open-source coding CLI that finishes only when checks pass</title>
+  <meta name="description" content="maxcode plans a coding task, edits your repo, and runs your tests before it says done. Open source. Bring your own model key.">
+  <meta property="og:title" content="maxcode | Done means the checks passed">
+  <meta property="og:description" content="An open-source terminal coding agent with a verifier loop, git checkpoints, and cost reporting.">
+  <meta property="og:url" content="https://ravaniroshan.github.io/maxcode/">
+  <meta property="og:image" content="https://ravaniroshan.github.io/maxcode/og.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="maxcode | Done means the checks passed">
+  <meta name="twitter:description" content="An open-source terminal coding agent with a verifier loop, git checkpoints, and cost reporting.">
+  <meta name="twitter:image" content="https://ravaniroshan.github.io/maxcode/og.png">
+  <link rel="canonical" href="https://ravaniroshan.github.io/maxcode/">
+  <link rel="icon" href="max-favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
+  <script src="app.js" defer></script>
 </head>
 <body>
-  <header>
-    <nav>
-      <a href="index.html">maxcode</a>
-      <a href="docs.html">Docs</a>
-      <a href="benchmark.html">Benchmark</a>
-      <a href="github.html">GitHub</a>
-    </nav>
+  <header class="nav">
+    <div class="wrap">
+      <a class="wordmark" href="index.html">maxcode<span class="cursor" aria-hidden="true"></span></a>
+      <nav class="nav-links" aria-label="Main">
+        <a href="docs.html">Docs</a>
+        <a href="benchmark.html">Benchmark</a>
+        <a href="https://github.com/RavaniRoshan/maxcode">GitHub</a>
+        <button class="theme-toggle" data-theme-toggle type="button">light</button>
+      </nav>
+    </div>
   </header>
+
   <main>
-    <h1>maxcode</h1>
-    <p class="lead">A terminal coding agent that marks a task done only after checks pass.</p>
-    <section>
-      <h2>The problem</h2>
-      <p>Coding tools often report a task as done when it is not done. The user finds the failure by hand.</p>
+    <section class="hero">
+      <div class="wrap hero-grid">
+        <div>
+          <p class="label">open-source terminal coding agent</p>
+          <h1>Done means the checks passed.</h1>
+          <p class="lead">maxcode plans the task, makes the edits, and runs your tests before it says the work is finished. If the checks fail, the step is not done.</p>
+          <div class="code-block mt-24">
+            <pre><code id="install-cmd">uvx --from git+https://github.com/RavaniRoshan/maxcode maxcode --help</code></pre>
+            <button class="copy" data-copy="#install-cmd" type="button" aria-label="Copy install command">copy</button>
+          </div>
+          <p class="small muted mt-24">Requires Python 3.12+, uv, git, and a <code>maxcode-engine</code> binary on your PATH. Bring your own model key.</p>
+          <div class="hero-actions">
+            <a class="btn btn-primary" href="docs.html">Read the docs</a>
+            <a class="btn btn-secondary" href="benchmark.html">Benchmark method</a>
+          </div>
+        </div>
+        <img class="hero-max" src="max.svg" width="240" height="270" alt="Max, the maxcode mascot: a silver pixel cursor with a white tick">
+      </div>
     </section>
-    <section>
-      <h2>The verifier loop</h2>
-      <p>A planner splits the task into steps. A worker edits files for one step. A verifier runs tests, builds, and lint commands. A step is done only when every check passes. Every step starts from a git checkpoint.</p>
+
+    <hr class="rule">
+
+    <section class="section-gap" aria-labelledby="loop-title">
+      <div class="wrap">
+        <p class="label">the loop</p>
+        <h2 id="loop-title">Plan. Work. Verify. Done.</h2>
+        <p class="lead">Every step has a checkpoint and a check. The model does not grade its own homework.</p>
+        <div class="grid grid-4 mt-32">
+          <article class="card pose-card">
+            <img src="max-idle.svg" width="96" height="108" alt="Max idle">
+            <p class="label step">01 / plan</p>
+            <h3>Split the task</h3>
+            <p class="small muted">The planner turns the request into a short, ordered plan. No edits yet.</p>
+          </article>
+          <article class="card pose-card">
+            <img src="max-working.svg" width="96" height="108" alt="Max working">
+            <p class="label step">02 / work</p>
+            <h3>Edit one step</h3>
+            <p class="small muted">The worker changes files for a single step, inside your repo.</p>
+          </article>
+          <article class="card pose-card">
+            <img src="max-pass.svg" width="96" height="108" alt="Max pass">
+            <p class="label step">03 / verify</p>
+            <h3>Run the checks</h3>
+            <p class="small muted">Tests, build, and lint run in a separate process. Output is kept in the log.</p>
+          </article>
+          <article class="card pose-card">
+            <img src="max-fail.svg" width="96" height="108" alt="Max failed">
+            <p class="label step">04 / done</p>
+            <h3>Pass or roll back</h3>
+            <p class="small muted">A clean run closes the step. A failure retries from the checkpoint, then stops.</p>
+          </article>
+        </div>
+      </div>
     </section>
-    <section>
-      <h2>Install in 60 seconds</h2>
-      <pre><code>git clone https://github.com/roshanravani/maxcode.git
-cd maxcode
-uv sync
-uv run maxcode --help</code></pre>
+
+    <hr class="rule">
+
+    <section class="section-gap" aria-labelledby="demo-title">
+      <div class="wrap">
+        <p class="label">example run</p>
+        <h2 id="demo-title">What a finished task looks like</h2>
+        <div class="terminal" role="img" aria-label="Example maxcode run: plan of three steps, a fix to app.py, pytest passing with six tests, ruff passing, and all checks passed.">
+          <div><span class="prompt">$</span> maxcode run <span class="path">"fix add so the tests pass"</span></div>
+          <div class="dim">&nbsp;</div>
+          <div><span class="step">plan</span>&nbsp;&nbsp; 3 steps</div>
+          <div><span class="step">step</span>&nbsp;&nbsp; 1/3 &nbsp;read <span class="path">app.py</span> and <span class="path">tests/test_app.py</span> &nbsp;<span class="pass">pass</span></div>
+          <div><span class="step">step</span>&nbsp;&nbsp; 2/3 &nbsp;fix <span class="path">add()</span> to return a + b &nbsp;<span class="pass">pass</span></div>
+          <div><span class="step">check</span>&nbsp; pytest -q &nbsp;<span class="pass">pass</span> &nbsp;<span class="dim">6 passed</span></div>
+          <div><span class="step">check</span>&nbsp; ruff check . &nbsp;<span class="pass">pass</span></div>
+          <div><span class="step">done</span>&nbsp;&nbsp; all checks passed &nbsp;<span class="pass">0 failures</span></div>
+        </div>
+        <p class="small muted mt-24">Transcript is illustrative. Your project supplies the checks, so the commands and output will differ.</p>
+      </div>
+    </section>
+
+    <hr class="rule">
+
+    <section class="section-gap" aria-labelledby="why-title">
+      <div class="wrap">
+        <p class="label">why a gate</p>
+        <h2 id="why-title">The verifier is outside the model</h2>
+        <div class="grid grid-3 mt-32">
+          <article class="card">
+            <h3>Checks run outside</h3>
+            <p class="small muted">The engine edits files and runs commands. A separate subprocess runs pytest, the build, or lint. A model cannot mark its own work as passing.</p>
+          </article>
+          <article class="card">
+            <h3>Every step has a checkpoint</h3>
+            <p class="small muted">Each step starts from a git ref under <code>refs/maxcode/</code>. A failed attempt rolls back to that ref, not to a half-edited tree.</p>
+          </article>
+          <article class="card">
+            <h3>Cost per finished task</h3>
+            <p class="small muted">Every run records input and output tokens. Partial usage is reported as partial, never guessed. Set a dollar ceiling per task.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <hr class="rule">
+
+    <section class="section-gap" aria-labelledby="bench-title">
+      <div class="wrap">
+        <p class="label">benchmark</p>
+        <h2 id="bench-title">No score without a log</h2>
+        <p class="lead">The harness runs the same task suite with the verifier on and off. This page will publish a pass rate only next to its raw log.</p>
+        <div class="table-wrap mt-32">
+          <table>
+            <thead>
+              <tr><th>Run</th><th>Verifier</th><th>Pass rate</th><th>Raw log</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>maxcode v0.1</td><td>on</td><td class="num"><span class="chip chip-unverified">not published</span></td><td class="num muted">pending</td></tr>
+              <tr><td>maxcode v0.1</td><td>off</td><td class="num"><span class="chip chip-unverified">not published</span></td><td class="num muted">pending</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="small muted mt-24">Run it yourself: <code>maxcode bench --verifier on</code>, then <code>uv run python -m maxcode.bench.report .maxcode/bench</code>.</p>
+      </div>
+    </section>
+
+    <hr class="rule">
+
+    <section class="section-gap" aria-labelledby="open-title">
+      <div class="wrap">
+        <p class="label">open source</p>
+        <h2 id="open-title">Apache-2.0. Your key. Your model.</h2>
+        <p class="lead">maxcode is an independent project. Point it at OpenRouter, Together, Groq, a local server, or any OpenAI-compatible endpoint. Keys stay in environment variables.</p>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="https://github.com/RavaniRoshan/maxcode">View on GitHub</a>
+          <a class="btn btn-secondary" href="docs.html">Install maxcode</a>
+        </div>
+      </div>
     </section>
   </main>
-  <footer>Apache-2.0 licensed.</footer>
+
+  <footer>
+    <div class="wrap footer-row">
+      <img class="footer-max" src="max-idle.svg" width="36" height="40" alt="">
+      <span>Apache-2.0</span>
+      <span>Independent project. Not affiliated with OpenAI or Sarvam AI.</span>
+      <span class="spacer"></span>
+      <a href="https://github.com/RavaniRoshan/maxcode">GitHub</a>
+    </div>
+  </footer>
 </body>
 </html>

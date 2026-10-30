@@ -31,9 +31,9 @@ dependencies = [
 maxcode = "maxcode.cli:app"
 
 [project.urls]
-Homepage = "https://github.com/roshanravani/maxcode"
-Documentation = "https://github.com/roshanravani/maxcode/tree/main/site"
-Issues = "https://github.com/roshanravani/maxcode/issues"
+Homepage = "https://github.com/RavaniRoshan/maxcode"
+Documentation = "https://github.com/RavaniRoshan/maxcode/tree/main/site"
+Issues = "https://github.com/RavaniRoshan/maxcode/issues"
 
 [dependency-groups]
 dev = [

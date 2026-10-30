@@ -11,9 +11,11 @@ maxcode
 Copyright 2026 maxcode contributors
 
 maxcode is an independent project. It is not affiliated with, endorsed by, or
-sponsored by OpenAI or Sarvam AI. The Codex CLI is used as an unmodified,
-separately installed engine under the Apache-2.0 license. The maxcode source
-tree contains no Codex source changes.
+sponsored by OpenAI or Sarvam AI.
+
+maxcode-engine is a fork of the OpenAI Codex CLI, modified and rebranded under
+the Apache-2.0 license. The upstream license and notice are preserved in the
+maxcode-engine repository. The Python CLI in this repository is original code.
 
 Runtime dependencies and their licenses:
 - Typer: MIT

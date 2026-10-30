@@ -1,6 +1,6 @@
 # Copyright 2026 maxcode contributors
 # SPDX-License-Identifier: Apache-2.0
-"""Run one step through the Codex CLI and parse its JSON event stream."""
+"""Run one step through the maxcode engine and parse its JSON event stream."""
 
 import contextlib
 import json
@@ -17,17 +17,16 @@ from maxcode.schemas import EngineResult
 
 
 def _binary() -> str:
-    override = os.environ.get("MAXCODE_ENGINE_BIN") or os.environ.get("MAXCODE_CODEX_BIN")
+    override = os.environ.get("MAXCODE_ENGINE_BIN")
     if override:
         return override
-    for candidate in ("maxcode-engine", "codex"):
-        found = shutil.which(candidate)
-        if found:
-            return found
+    found = shutil.which("maxcode-engine")
+    if found:
+        return found
     raise EngineError(
-        "The Codex engine binary was not found.",
-        "maxcode looks for 'maxcode-engine' (or 'codex') on PATH, or in MAXCODE_ENGINE_BIN.",
-        "Install Codex, or set MAXCODE_CODEX_BIN to the binary path.",
+        "The maxcode engine binary was not found.",
+        "maxcode looks for 'maxcode-engine' on PATH, or uses MAXCODE_ENGINE_BIN.",
+        "Build the engine or set MAXCODE_ENGINE_BIN to the binary path.",
     )
 
 
@@ -71,7 +70,7 @@ def run_step(
     model: str,
     timeout_s: float,
 ) -> EngineResult:
-    """Run Codex in non-interactive mode and return its exit code and output."""
+    """Run maxcode in non-interactive mode and return its exit code and output."""
     root = Path(repo).resolve()
     if timeout_s <= 0:
         raise EngineError(
@@ -82,13 +81,15 @@ def run_step(
     if not root.is_dir():
         raise EngineError(
             f"Repository '{root}' does not exist.",
-            "Codex needs an existing working directory.",
+            "maxcode needs an existing working directory.",
             "Check the repository path and run the command again.",
         )
     binary = _binary()
     command = _build_command(binary, root, provider, model, prompt)
     env = os.environ.copy()
-    env.setdefault("CODEX_HOME", str(root / ".maxcode" / "codex-home"))
+    home = Path(env.setdefault("MAXCODE_HOME", str(root / ".maxcode" / "engine-home")))
+    with contextlib.suppress(OSError):
+        home.mkdir(parents=True, exist_ok=True)
     start = time.monotonic()
     timed_out = False
     try:
@@ -104,9 +105,9 @@ def run_step(
         )
     except OSError as exc:
         raise EngineError(
-            "Could not start the Codex engine.",
+            "Could not start the maxcode engine.",
             str(exc),
-            "Check MAXCODE_CODEX_BIN and file permissions, then retry.",
+            "Check MAXCODE_ENGINE_BIN and file permissions, then retry.",
         ) from exc
     try:
         stdout, stderr = process.communicate(timeout=timeout_s)

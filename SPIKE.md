@@ -1,6 +1,8 @@
 # SPIKE: Phase 0
 
-Status: Complete (wrapper decision; live runs skipped by user). Codex `v0.165.0` source build restarted in `/tmp/opencode/codex-src`.
+Status: Complete (fork decision; offline end-to-end passed). The engine fork is
+built as `maxcode-engine` 0.1.0 from upstream v0.165.0. Live provider runs remain
+blocked by account credits.
 
 - Date: 2026-10-29
 - Codex tag: `rust-v0.165.0`
@@ -182,13 +184,26 @@ Conclusion: A1 holds for mainstream open coding CLIs. The idea exists in compone
 
 ## Blockers
 
-- `OPENROUTER_API_KEY` is not visible to the OpenCode process. Export it in the shell that launches OpenCode and restart OpenCode.
-- The source build must finish before the live runs can start.
+- The supplied OpenRouter key returned HTTP 402 (insufficient credits). Free
+  model slugs returned HTTP 404. Live T0 runs need a funded key or another
+  OpenAI-compatible endpoint.
 
 ## T0 completion note
 
 Live runs on `qwen/qwen3-coder-next` and `deepseek/deepseek-v3.2` were skipped
-by the user. The wire format was validated against the strict mock with Codex
-0.163.0, and the OpenRouter OpenAPI schema was checked against Codex's payload.
-The wrapper decision stands. When an API key is available, run the exact command
-in section 2 with `MAXCODE_CODEX_BIN` pointing at the source-built Codex binary.
+because the supplied key had no usable credits. The wire format was validated
+against a strict local Responses API mock, and the full CLI loop was exercised
+offline on 2026-10-30:
+
+- `maxcode-engine 0.1.0` linked from the `dev-small` profile.
+- `maxcode-engine exec --json` ran a mocked `exec_command`, created `hello.txt`,
+  and emitted `turn.completed` usage.
+- `maxcode run --yes` planned through a mocked `/chat/completions`, edited a
+  buggy `app.py` through the engine, passed `pytest`, and wrote a checkpoint
+  under `refs/maxcode/`.
+- The Python suite passed (108 tests), with ruff and mypy clean.
+
+Engine binary used for the offline run:
+`/home/shiva/projects/maxcode-engine/maxcode-rs/target/dev-small/maxcode-engine`.
+When a funded key is available, run the exact command in section 2 with
+`MAXCODE_ENGINE_BIN` pointing at that binary.

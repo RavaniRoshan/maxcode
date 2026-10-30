@@ -3,32 +3,146 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Benchmark - maxcode</title>
+  <title>Benchmark | maxcode</title>
+  <meta name="description" content="How the maxcode benchmark works, what the default suite contains, and why no score is published without a raw log.">
+  <link rel="icon" href="max-favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
+  <script src="app.js" defer></script>
 </head>
 <body>
-  <header>
-    <nav>
-      <a href="index.html">maxcode</a>
-      <a href="docs.html">Docs</a>
-      <a href="benchmark.html">Benchmark</a>
-      <a href="github.html">GitHub</a>
-    </nav>
+  <header class="nav">
+    <div class="wrap">
+      <a class="wordmark" href="index.html">maxcode<span class="cursor" aria-hidden="true"></span></a>
+      <nav class="nav-links" aria-label="Main">
+        <a href="docs.html">Docs</a>
+        <a href="benchmark.html" aria-current="page">Benchmark</a>
+        <a href="https://github.com/RavaniRoshan/maxcode">GitHub</a>
+        <button class="theme-toggle" data-theme-toggle type="button">light</button>
+      </nav>
+    </div>
   </header>
+
   <main>
-    <h1>Benchmark</h1>
-    <p>Twenty small tasks, run twice: once with the verifier on and once with it off.</p>
-    <table>
-      <thead>
-        <tr><th>verifier</th><th>tasks</th><th>pass rate</th><th>cost per completed task</th><th>unverified</th></tr>
-      </thead>
-      <tbody>
-        <tr><td>on</td><td>20</td><td>see logs</td><td>see logs</td><td>0</td></tr>
-        <tr><td>off</td><td>20</td><td>see logs</td><td>see logs</td><td>0</td></tr>
-      </tbody>
-    </table>
-    <p>The benchmark page shows the logs, the script, and the result of each run, including failures.</p>
+    <section class="hero">
+      <div class="wrap">
+        <p class="label">benchmark</p>
+        <h1>No score without a log.</h1>
+        <p class="lead">A pass rate is only useful if you can inspect the run that produced it. This page publishes a number only next to the raw log, the task suite, and the model settings.</p>
+      </div>
+    </section>
+
+    <hr class="rule">
+
+    <section class="section-gap">
+      <div class="wrap">
+        <p class="label">method</p>
+        <h2>Same tasks. Two configurations.</h2>
+        <p class="prose">The runner executes every task twice: once with the verifier enabled and once with it disabled. The verifier configuration runs the repository's own test command after each step and refuses to close a step that fails. The disabled configuration records what the model produced without that gate.</p>
+        <div class="grid grid-3 mt-32">
+          <article class="card">
+            <p class="label">input</p>
+            <h3>Pinned repositories</h3>
+            <p class="small muted">Each task names a public repository and an exact commit. The runner clones the commit, not a moving branch.</p>
+          </article>
+          <article class="card">
+            <p class="label">measure</p>
+            <h3>Pass rate and cost</h3>
+            <p class="small muted">A task passes only when its score command exits zero. Tokens and dollars are summed per completed task.</p>
+          </article>
+          <article class="card">
+            <p class="label">evidence</p>
+            <h3>Raw logs</h3>
+            <p class="small muted">Diffs, check output, token usage, and final state are written under <code>.maxcode/bench/</code> for every run.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <hr class="rule">
+
+    <section class="section-gap">
+      <div class="wrap">
+        <p class="label">default suite</p>
+        <h2>20 runs, four Python projects</h2>
+        <p class="prose">The default suite contains four pinned Python projects, repeated five times each. The repeats measure consistency across model calls; they are not 20 different codebases.</p>
+        <div class="table-wrap mt-32">
+          <table>
+            <thead><tr><th>Project</th><th>Tasks</th><th>Score command</th></tr></thead>
+            <tbody>
+              <tr><td>pallets/click</td><td class="num">5</td><td><code>python -m pytest tests/test_basic.py -q</code></td></tr>
+              <tr><td>pallets/itsdangerous</td><td class="num">5</td><td><code>python -m pytest tests/ -q</code></td></tr>
+              <tr><td>pallets/markupsafe</td><td class="num">5</td><td><code>python -m pytest tests/ -q</code></td></tr>
+              <tr><td>psf/requests</td><td class="num">5</td><td><code>python -m pytest tests/test_requests.py</code></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="small muted mt-24">A larger, multi-language suite is planned. Until then, do not read this suite as a general coding ranking.</p>
+      </div>
+    </section>
+
+    <hr class="rule">
+
+    <section class="section-gap">
+      <div class="wrap">
+        <p class="label">results</p>
+        <h2>Published runs</h2>
+        <p class="prose">No run has been published yet. The table is intentionally empty rather than filled with an estimate. A published row must link to the log that produced it.</p>
+        <div class="table-wrap mt-32">
+          <table>
+            <thead>
+              <tr><th>Run</th><th>Model</th><th>Verifier</th><th class="num">Pass rate</th><th class="num">Cost / pass</th><th>Log</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>maxcode v0.1</td>
+                <td class="muted">not published</td>
+                <td>on</td>
+                <td class="num"><span class="chip chip-unverified">pending</span></td>
+                <td class="num muted">pending</td>
+                <td class="num muted">pending</td>
+              </tr>
+              <tr>
+                <td>maxcode v0.1</td>
+                <td class="muted">not published</td>
+                <td>off</td>
+                <td class="num"><span class="chip chip-unverified">pending</span></td>
+                <td class="num muted">pending</td>
+                <td class="num muted">pending</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <hr class="rule">
+
+    <section class="section-gap">
+      <div class="wrap">
+        <p class="label">reproduce</p>
+        <h2>Run it yourself</h2>
+        <div class="code-block">
+          <pre><code id="bench-cmd">maxcode bench --verifier on
+maxcode bench --verifier off
+uv run python -m maxcode.bench.report .maxcode/bench</code></pre>
+          <button class="copy" data-copy="#bench-cmd" type="button" aria-label="Copy benchmark commands">copy</button>
+        </div>
+        <p class="mt-24">The runner and the suite live in <a href="https://github.com/RavaniRoshan/maxcode/tree/main/src/maxcode/bench">src/maxcode/bench</a>. Add your own tasks by dropping JSON files into the suite directory.</p>
+      </div>
+    </section>
   </main>
-  <footer>Apache-2.0 licensed.</footer>
+
+  <footer>
+    <div class="wrap footer-row">
+      <img class="footer-max" src="max-idle.svg" width="36" height="40" alt="">
+      <span>Apache-2.0</span>
+      <span>Independent project. Not affiliated with OpenAI or Sarvam AI.</span>
+      <span class="spacer"></span>
+      <a href="https://github.com/RavaniRoshan/maxcode">GitHub</a>
+    </div>
+  </footer>
 </body>
 </html>

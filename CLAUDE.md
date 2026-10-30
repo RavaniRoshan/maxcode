@@ -1,6 +1,6 @@
 # maxcode
 
-maxcode is an open-source coding CLI. It plans a task, edits code with the Codex engine, and marks the task done only after checks pass.
+maxcode is an open-source coding CLI. It plans a task, edits code with the maxcode engine, and marks the task done only after checks pass.
 
 ## Commands
 - Install: `uv sync`
@@ -12,7 +12,7 @@ maxcode is an open-source coding CLI. It plans a task, edits code with the Codex
 - Read the PRD before you start. The PRD is the source of truth.
 - Work on one task at a time. Write the failing test first.
 - Commit after each task: `T<number>: <summary>`.
-- Never invent a Codex CLI flag. Read it from the Codex source or help output.
+- Never invent an engine CLI flag. Read it from the engine source or help output.
 - Never copy text, assets, or code from Sarvam. Never inspect a Sarvam binary.
 - Never remove LICENSE or NOTICE.
 - Never weaken or delete a test to make it pass.

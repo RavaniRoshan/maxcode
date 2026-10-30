@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Fake codex executable used by engine tests."""
+"""Fake engine executable used by engine tests."""
 
 import json
 import os
@@ -7,7 +7,7 @@ import sys
 import time
 from pathlib import Path
 
-mode = os.environ.get("FAKE_CODEX_MODE", "success")
+mode = os.environ.get("FAKE_ENGINE_MODE", "success")
 repo = Path.cwd()
 for index, value in enumerate(sys.argv):
     if value == "-C" and index + 1 < len(sys.argv):
@@ -15,7 +15,7 @@ for index, value in enumerate(sys.argv):
         break
 
 if mode == "success":
-    (repo / "hello.txt").write_text("hello from fake codex", encoding="utf-8")
+    (repo / "hello.txt").write_text("hello from fake engine", encoding="utf-8")
     events = [
         {
             "type": "item.completed",

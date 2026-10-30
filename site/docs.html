@@ -3,33 +3,155 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Docs - maxcode</title>
+  <title>Docs | maxcode</title>
+  <meta name="description" content="Install maxcode, configure a provider, and learn how the plan, work, verify, and checkpoint loop works.">
+  <link rel="icon" href="max-favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
+  <script src="app.js" defer></script>
 </head>
 <body>
-  <header>
-    <nav>
-      <a href="index.html">maxcode</a>
-      <a href="docs.html">Docs</a>
-      <a href="benchmark.html">Benchmark</a>
-      <a href="github.html">GitHub</a>
-    </nav>
+  <header class="nav">
+    <div class="wrap">
+      <a class="wordmark" href="index.html">maxcode<span class="cursor" aria-hidden="true"></span></a>
+      <nav class="nav-links" aria-label="Main">
+        <a href="docs.html" aria-current="page">Docs</a>
+        <a href="benchmark.html">Benchmark</a>
+        <a href="https://github.com/RavaniRoshan/maxcode">GitHub</a>
+        <button class="theme-toggle" data-theme-toggle type="button">light</button>
+      </nav>
+    </div>
   </header>
-  <main>
-    <h1>Docs</h1>
-    <h2>Configure</h2>
-    <p>Create <code>maxcode.toml</code> in your project with a provider, one model for the planner, one model for the worker, and limits.</p>
-    <h2>Commands</h2>
-    <ul>
-      <li><code>maxcode run TASK</code> - plan, edit, and verify.</li>
-      <li><code>maxcode plan TASK</code> - show the plan and stop.</li>
-      <li><code>maxcode undo</code> - restore the last checkpoint.</li>
-      <li><code>maxcode cost [RUN_ID]</code> - show the cost of a run.</li>
-      <li><code>maxcode bench</code> - run the benchmark suite.</li>
-    </ul>
-    <h2>Checks</h2>
-    <p>maxcode detects test, build, and lint commands for Python, Node, Rust, and Go repositories.</p>
+
+  <main class="wrap docs">
+    <aside class="sidebar" aria-label="On this page">
+      <p class="label">on this page</p>
+      <a href="#install">Install</a>
+      <a href="#config">Config</a>
+      <a href="#commands">Commands</a>
+      <a href="#run">How a run works</a>
+      <a href="#checkpoints">Checkpoints and undo</a>
+      <a href="#cost">Cost report</a>
+      <a href="#benchmark">Benchmark method</a>
+    </aside>
+
+    <div>
+      <div class="doc-section" id="install">
+        <h2>Install</h2>
+        <p>maxcode is a Python CLI. It calls a separate engine binary for each step. Install both.</p>
+        <h3>Python CLI</h3>
+        <div class="code-block">
+          <pre><code id="doc-install">uvx --from git+https://github.com/RavaniRoshan/maxcode maxcode --help</code></pre>
+          <button class="copy" data-copy="#doc-install" type="button" aria-label="Copy install command">copy</button>
+        </div>
+        <p class="small muted mt-24">From a checkout, use <code>uv sync</code> and <code>uv run maxcode</code>.</p>
+        <h3 class="mt-32">Engine</h3>
+        <div class="code-block">
+          <pre><code id="doc-engine">git clone https://github.com/RavaniRoshan/maxcode-engine.git
+cd maxcode-engine/maxcode-rs
+cargo build --release -p maxcode-cli --bin maxcode-engine
+install -m 755 target/release/maxcode-engine ~/.local/bin/maxcode-engine</code></pre>
+          <button class="copy" data-copy="#doc-engine" type="button" aria-label="Copy engine build commands">copy</button>
+        </div>
+        <p class="mt-24">The engine is found on <code>PATH</code> as <code>maxcode-engine</code>, or set <code>MAXCODE_ENGINE_BIN</code> to an absolute path. There is no fallback binary.</p>
+      </div>
+
+      <div class="doc-section" id="config">
+        <h2>Config</h2>
+        <p>Create <code>maxcode.toml</code> in the project root. The key is read from the environment named by <code>api_key_env</code>; it is never written to disk.</p>
+        <div class="code-block">
+          <pre><code id="doc-config">[provider.main]
+base_url    = "https://openrouter.ai/api/v1"
+api_key_env = "OPENROUTER_API_KEY"
+
+[planner]
+provider = "main"
+model    = "qwen/qwen3-coder-next"
+
+[worker]
+provider = "main"
+model    = "deepseek/deepseek-v3.2"
+
+[limits]
+max_retries_per_step  = 3
+max_cost_usd_per_task = 2.00
+max_diff_lines        = 400
+max_steps             = 12</code></pre>
+          <button class="copy" data-copy="#doc-config" type="button" aria-label="Copy example config">copy</button>
+        </div>
+        <p class="mt-24">Any OpenAI-compatible chat endpoint works. Free model slugs change often; if one is unavailable, use a model your account can access.</p>
+      </div>
+
+      <div class="doc-section" id="commands">
+        <h2>Commands</h2>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Command</th><th>Action</th></tr></thead>
+            <tbody>
+              <tr><td><code>maxcode run TASK</code></td><td>Plan, edit, verify, and checkpoint a task.</td></tr>
+              <tr><td><code>maxcode plan TASK</code></td><td>Print the plan and stop.</td></tr>
+              <tr><td><code>maxcode undo</code></td><td>Restore the last checkpoint.</td></tr>
+              <tr><td><code>maxcode cost [RUN_ID]</code></td><td>Show token and cost totals for a run.</td></tr>
+              <tr><td><code>maxcode bench</code></td><td>Run the benchmark suite.</td></tr>
+              <tr><td><code>maxcode version</code></td><td>Print the installed version.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="mt-24">Flags: <code>run --yes</code>, <code>run --config PATH</code>, <code>run --max-cost USD</code>, <code>plan --config PATH</code>, <code>bench --verifier on|off</code>, <code>bench --suite PATH</code>.</p>
+      </div>
+
+      <div class="doc-section" id="run">
+        <h2>How a run works</h2>
+        <ol>
+          <li><strong>Plan.</strong> The planner splits the request into ordered steps.</li>
+          <li><strong>Work.</strong> The worker edits the repo for one step through the engine.</li>
+          <li><strong>Verify.</strong> Tests, build, and lint run in a separate process. A step passes only when every check exits zero.</li>
+          <li><strong>Checkpoint.</strong> Every step starts from a git ref under <code>refs/maxcode/</code>, so a failed attempt has somewhere to return to.</li>
+          <li><strong>Retry.</strong> A failing step is restored and retried up to <code>max_retries_per_step</code>.</li>
+        </ol>
+        <p>Detected checks cover Python, Node, Rust, and Go projects. Add or override commands in <code>maxcode.toml</code>.</p>
+      </div>
+
+      <div class="doc-section" id="checkpoints">
+        <h2>Checkpoints and undo</h2>
+        <p>Before each step, maxcode records a git ref under <code>refs/maxcode/</code>. On a verifier failure it restores the step's starting tree before retrying. If every retry fails, the run stops and leaves the last good checkpoint in place.</p>
+        <div class="code-block">
+          <pre><code id="doc-undo">maxcode undo</code></pre>
+          <button class="copy" data-copy="#doc-undo" type="button" aria-label="Copy undo command">copy</button>
+        </div>
+        <p class="small muted mt-24">Undo restores the tree to that snapshot, including removing files that did not exist at the checkpoint. Commit or stash unrelated work before you run it.</p>
+      </div>
+
+      <div class="doc-section" id="cost">
+        <h2>Cost report</h2>
+        <p>Every run writes JSONL events under <code>.maxcode/runs/</code>. Planner and worker responses record input and output tokens. <code>maxcode cost</code> sums them and prices them from the configured model rates.</p>
+        <p>If a provider omits usage, the report marks the run <span class="chip chip-unverified">partial</span> instead of inventing a number. A task can be capped with <code>run --max-cost</code> or <code>max_cost_usd_per_task</code>.</p>
+      </div>
+
+      <div class="doc-section" id="benchmark">
+        <h2>Benchmark method</h2>
+        <p>The harness runs a fixed task suite twice: once with the verifier enabled and once with it disabled. Each run records the diff, check output, tokens, cost, and final state.</p>
+        <div class="code-block">
+          <pre><code id="doc-bench">maxcode bench --verifier on
+maxcode bench --verifier off
+uv run python -m maxcode.bench.report .maxcode/bench</code></pre>
+          <button class="copy" data-copy="#doc-bench" type="button" aria-label="Copy benchmark commands">copy</button>
+        </div>
+        <p class="mt-24">A pass rate is published only alongside its raw log. See the <a href="benchmark.html">benchmark page</a> for the current publication status.</p>
+      </div>
+    </div>
   </main>
-  <footer>Apache-2.0 licensed.</footer>
+
+  <footer>
+    <div class="wrap footer-row">
+      <img class="footer-max" src="max-idle.svg" width="36" height="40" alt="">
+      <span>Apache-2.0</span>
+      <span>Independent project. Not affiliated with OpenAI or Sarvam AI.</span>
+      <span class="spacer"></span>
+      <a href="https://github.com/RavaniRoshan/maxcode">GitHub</a>
+    </div>
+  </footer>
 </body>
 </html>

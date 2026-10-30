@@ -26,7 +26,7 @@ class ProviderError(MaxcodeError):
 
 
 class EngineError(MaxcodeError):
-    """The Codex engine failed to start or to finish."""
+    """The maxcode engine failed to start or to finish."""
 
 
 class PlanError(MaxcodeError):

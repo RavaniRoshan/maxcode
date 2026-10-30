@@ -121,7 +121,7 @@ def run_task(
         )
 
     from maxcode.checkpoints import diff_stats as real_diff_stats
-    from maxcode.engine.codex import run_step as real_run_step
+    from maxcode.engine.runner import run_step as real_run_step
     from maxcode.providers.openai_compat import OpenAICompatProvider
 
     if meter is None:

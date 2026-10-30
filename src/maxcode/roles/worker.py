@@ -7,7 +7,7 @@ from pathlib import Path
 
 from maxcode.config import Config, ProviderConfig
 from maxcode.cost import CostMeter
-from maxcode.engine.codex import run_step
+from maxcode.engine.runner import run_step
 from maxcode.schemas import EngineResult, PlanStep
 
 FAILURE_LIMIT = 4000
