@@ -1,0 +1,43 @@
+---
+title: Cost reporting
+description: What maxcode counts, what it refuses to guess, and when the report is partial.
+---
+
+maxcode records input and output tokens for every planner and worker call. At
+the end of a run it prints:
+
+```text
+steps: 1/1  cost: $0.0000  tokens: 7182 in / 1067 out
+cost is partial: some calls lacked a price or a token count
+```
+
+## Prices come from config
+
+A model appears in the dollar total only when `maxcode.toml` has a pricing entry:
+
+```toml
+[pricing."model-name"]
+input_per_mtok_usd  = 0.0
+output_per_mtok_usd = 0.0
+```
+
+If a model has no price, maxcode still reports tokens but marks the cost
+`partial`. It never guesses a price.
+
+## Caps
+
+`run --max-cost USD` or `max_cost_usd_per_task` stops the run when the meter
+reaches the cap. The stop reason is written to the run log.
+
+## Local inference
+
+Ollama runs have no API charge. The live demo reports `$0.0000` because the
+config has no pricing entry, not because a hosted provider was free. Tokens are
+the useful unit for local runs.
+
+## Read a past run
+
+```bash
+maxcode cost
+maxcode cost RUN_ID
+```

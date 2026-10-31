@@ -1,0 +1,36 @@
+---
+title: How a run works
+description: Planner, worker, verifier, retries, and the final checkpoint state.
+---
+
+## The loop
+
+1. **Plan.** The planner reads the task and a repository summary. It returns a
+   JSON plan with small, ordered steps and the checks for each step.
+2. **Work.** The worker receives one step and edits the repository through the
+   engine. It cannot mark the step done.
+3. **Verify.** The verifier runs the plan checks and detected project checks in
+   a separate subprocess. The model's text is ignored.
+4. **Checkpoint.** The step starts from a git ref under `refs/maxcode/`. A pass
+   keeps the work; a failure retries from the step checkpoint.
+
+## Retries and stops
+
+The default retry limit is 3 attempts per step, including the first. A failed
+attempt returns the check output to the worker. At the retry limit the run
+restores the step checkpoint and stops with exit code `1`.
+
+A run also stops when it reaches the cost cap, the step cap, or an engine
+failure. Every stop is written to the JSONL run log with a reason.
+
+## Unverified steps
+
+A step with no resolvable checks is marked unverified. The task is not reported
+as done; the run exits `4` and lists those steps. This is deliberate: "no checks
+ran" is not a pass.
+
+## Evidence
+
+Every run writes `.maxcode/runs/RUN_ID/log.jsonl`. The log records the plan,
+step starts, worker token counts, each check's exit code and output tail, retry
+events, step ends, and the final cost. The benchmark reads these logs.

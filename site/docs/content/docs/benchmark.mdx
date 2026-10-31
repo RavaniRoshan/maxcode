@@ -1,0 +1,47 @@
+---
+title: Benchmark
+description: The published verifier on/off result, its failures, and the raw logs.
+---
+
+The benchmark runs the same pinned tasks twice: once with the verifier on, once
+with it off. A task passes only when its separate score command exits zero.
+
+## Published result
+
+The 2026-10-31 run used three tasks from the default suite: one each from
+`pallets/click`, `pallets/itsdangerous`, and `pallets/markupsafe`.
+
+| Verifier | Score passes | Run passes | Tokens in / out |
+|---|---:|---:|---:|
+| on | 3/3 (100%) | 0/3 | 5,613 / 580 |
+| off | 3/3 (100%) | 3/3 | 125,320 / 3,918 |
+
+**Absolute gain: 0 percentage points.** The verifier-on arm hit the 300-second
+worker timeout before verification; the repositories were unchanged, so the
+final score still passed. This is a ceiling effect, not evidence of an advantage.
+
+## Failures and exclusions
+
+- Verifier-on task-001 and task-002 timed out at 300 seconds; task-003 had no
+  worker call. The verifier never ran in that arm.
+- Both arms produced zero diffs on already-green repositories.
+- `psf/requests` was excluded: four tests fail on a clean checkout in this
+  environment, so its score command cannot pass regardless of the model.
+- OpenRouter, Hugging Face, and DeepSeek had no credential and were not run.
+
+## Reproduce
+
+```bash
+maxcode bench --verifier on
+maxcode bench --verifier off
+uv run python -m maxcode.bench.report .maxcode/bench
+```
+
+Raw evidence:
+
+- [docs/BENCH.md](https://github.com/RavaniRoshan/maxcode/blob/main/docs/BENCH.md)
+- [verifier-on logs](https://github.com/RavaniRoshan/maxcode/tree/main/docs/bench/2026-10-31/verifier-on)
+- [verifier-off logs](https://github.com/RavaniRoshan/maxcode/tree/main/docs/bench/2026-10-31/verifier-off)
+
+The default suite contains 20 task files across four projects; the published
+run is a 3-task subset, not a claim about the full suite.

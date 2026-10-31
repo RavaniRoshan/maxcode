@@ -1,0 +1,35 @@
+---
+title: Security and secrets
+description: Where keys live, what the run log records, and what the verifier does not trust.
+---
+
+## Keys stay in the environment
+
+`api_key_env` names an environment variable. maxcode reads the value at request
+time. It does not write the value to `maxcode.toml`, a checkpoint, or the JSONL
+run log.
+
+The engine receives the variable name, not the value. Provider errors are
+redacted before they reach a user-facing error message.
+
+## The verifier is outside the model
+
+The verifier runs commands in a separate subprocess. It does not ask the model
+whether the work is done. It reads exit codes and a bounded output tail.
+
+## Protected paths
+
+The verifier rejects changes to protected paths and test paths unless the plan
+explicitly allows test edits. It also rejects a diff over the configured line
+limit.
+
+## Local runs
+
+The live evidence used local Ollama models. Nothing in the site or the CLI
+bundles a provider key. The Python package has no client-side bundling step.
+
+## Reporting a problem
+
+Open an issue at
+[GitHub issues](https://github.com/RavaniRoshan/maxcode/issues). Do not include
+a live API key in an issue, log, or screenshot.

@@ -1,0 +1,69 @@
+---
+title: Providers and engine
+description: Configure any OpenAI-compatible Responses endpoint and select the engine binary.
+---
+
+## Provider config
+
+maxcode reads `maxcode.toml` from the current directory, a `--config` path, or
+the user config directory. The key is read from the environment variable named
+by `api_key_env`; it is never written to a config file or run log.
+
+```toml
+[provider.main]
+base_url    = "https://your-provider.example/v1"
+api_key_env = "MAXCODE_API_KEY"
+
+[planner]
+provider = "main"
+model    = "your-planner-model"
+
+[worker]
+provider = "main"
+model    = "your-worker-model"
+```
+
+The engine side uses the Responses API. Codex 0.165 removed Chat Completions
+support, so the endpoint must expose `/v1/responses`.
+
+## Ollama
+
+Ollama 0.31.1 works with the adapter when the worker command disables web
+search and multi-agent tools. The adapter does this by default. A working local
+config:
+
+```toml
+[provider.local]
+base_url    = "http://127.0.0.1:11434/v1"
+api_key_env = "OLLAMA_API_KEY"
+
+[planner]
+provider = "local"
+model    = "llama3.2:3b"
+
+[worker]
+provider = "local"
+model    = "llama3.2:3b"
+```
+
+Set `OLLAMA_API_KEY=local`; Ollama ignores the value. The adapter reads
+`MAXCODE_REASONING_EFFORT` (default `low`) and
+`MAXCODE_MODEL_CONTEXT_WINDOW` (optional). The live runs used `none` and
+`16384`.
+
+## Engine selection
+
+The adapter looks for an engine in this order:
+
+1. `MAXCODE_ENGINE_BIN`
+2. `maxcode-engine` on `PATH`
+3. `codex` on `PATH`, version 0.165 or newer
+
+Stock Codex and `maxcode-engine` produced the same event types on the same live
+task. The fork is optional; use it only if you need the rebranded binary or a
+future engine patch.
+
+## Credentials
+
+Never commit a key. maxcode redacts provider errors and writes only token counts
+to the JSONL run log. A missing key fails before any request.

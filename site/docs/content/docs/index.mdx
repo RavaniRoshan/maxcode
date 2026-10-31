@@ -1,0 +1,36 @@
+---
+title: maxcode documentation
+description: A terminal coding agent that marks a step done only when its checks pass.
+---
+
+maxcode is an open-source coding CLI. It plans a task, edits the repository,
+and runs the checks your project already trusts. A step is done only when those
+checks exit zero.
+
+The project is deliberately small enough to audit: the Python CLI owns the
+plan/verify loop, and a separate engine process owns file edits and commands.
+
+## Start here
+
+- [Quickstart](/docs/quickstart) — install the CLI and run one verified task.
+- [Providers](/docs/providers) — point maxcode at an OpenAI-compatible Responses endpoint.
+- [Commands](/docs/commands) — the full command and flag list.
+- [How a run works](/docs/how-a-run-works) — planner, worker, verifier, checkpoint.
+- [Benchmark](/docs/benchmark) — method, committed result, and raw logs.
+
+## What is verified
+
+The live evidence in this repository comes from local Ollama models:
+`qwen3:1.7b` and `llama3.2:3b` made multi-turn tool calls, edited files on disk,
+and closed a step only after `pytest` passed. The original OpenRouter models
+remain unverified because no funded credential was available.
+
+The benchmark result is published with its logs: 3/3 in both verifier arms, a
+0-point gain, and the verifier-on timeout documented. See
+[the benchmark page](/docs/benchmark) and
+[`docs/BENCH.md`](https://github.com/RavaniRoshan/maxcode/blob/main/docs/BENCH.md).
+
+## License
+
+Apache-2.0. maxcode is an independent fork of the Codex CLI and is not
+affiliated with OpenAI or Sarvam AI.

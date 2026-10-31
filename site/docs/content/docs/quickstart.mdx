@@ -1,0 +1,84 @@
+---
+title: Quickstart
+description: Install maxcode, connect a provider, and run one task through the verifier.
+---
+
+## 1. Install the CLI
+
+Requires Python 3.12+, [uv](https://docs.astral.sh/uv/), and git.
+
+```bash
+uvx --from git+https://github.com/RavaniRoshan/maxcode maxcode --help
+```
+
+Or work from a checkout:
+
+```bash
+git clone https://github.com/RavaniRoshan/maxcode.git
+cd maxcode
+uv sync
+uv run maxcode --help
+```
+
+## 2. Install an engine
+
+The engine is the process that edits files and runs commands. Stock Codex
+0.165 or newer is the one-minute path:
+
+```bash
+npm install -g @openai/codex@0.165.0
+codex --version
+```
+
+The adapter also accepts `maxcode-engine` on `PATH`, or an explicit
+`MAXCODE_ENGINE_BIN`. See [Providers](/docs/providers) for the full selection
+order.
+
+## 3. Configure a local provider
+
+The repository ships a live-verified local configuration. Pull the worker model
+and create `maxcode.toml`:
+
+```bash
+ollama pull llama3.2:3b
+export OLLAMA_API_KEY=local
+```
+
+```toml title="maxcode.toml"
+[provider.local]
+base_url    = "http://127.0.0.1:11434/v1"
+api_key_env = "OLLAMA_API_KEY"
+
+[planner]
+provider = "local"
+model    = "llama3.2:3b"
+
+[worker]
+provider = "local"
+model    = "llama3.2:3b"
+
+[checks]
+test = "python -m pytest -q"
+```
+
+A stronger planner such as `gpt-oss-20b` produces more reliable JSON plans.
+The planner must be able to follow the plan schema; a 1.5B planner produced weak
+plans in the benchmark.
+
+## 4. Run a task
+
+In a git repository with a failing test:
+
+```bash
+maxcode run --yes "Edit app.py so add(a, b) returns a + b. Run python -m pytest -q. Do not change tests."
+```
+
+The run prints a summary like:
+
+```text
+steps: 1/1  cost: $0.0000  tokens: 7182 in / 1067 out
+cost is partial: some calls lacked a price or a token count
+```
+
+Exit code `0` means the verifier passed. A non-zero code means the work is not
+done. See [Commands](/docs/commands) for every exit code.

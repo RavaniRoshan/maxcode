@@ -1,0 +1,39 @@
+---
+title: Checkpoints and undo
+description: How maxcode isolates and restores work without rewriting your branch.
+---
+
+Before each step, maxcode saves the working tree as a commit under:
+
+```text
+refs/maxcode/RUN_ID/STEP_NUMBER
+```
+
+The checkpoint uses a temporary git index, so your real index is unchanged. It
+also records untracked files that are not ignored.
+
+## Undo
+
+```bash
+maxcode undo
+```
+
+`undo` restores the most recent checkpoint and removes that ref. It does not
+rewrite your branch history. Earlier steps that passed are preserved.
+
+## Protected paths
+
+The verifier rejects a step that edits a protected path. Defaults are:
+
+- `**/*.lock`
+- `.github/**`
+- `tests/**`, `**/test_*.py`, `**/*.test.*` unless the plan sets
+  `edits_tests: true`
+
+The diff size is also capped (default 400 changed lines). A protected-path or
+diff-size violation fails the step even when the test command passes.
+
+## Outside git
+
+maxcode stops with a configuration error and asks you to run `git init`. There
+is no checkpoint without a repository.

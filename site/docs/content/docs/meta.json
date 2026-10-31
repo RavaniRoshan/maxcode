@@ -1,0 +1,15 @@
+{
+  "title": "Documentation",
+  "pages": [
+    "index",
+    "quickstart",
+    "providers",
+    "commands",
+    "how-a-run-works",
+    "checkpoints",
+    "cost",
+    "benchmark",
+    "security",
+    "legal"
+  ]
+}

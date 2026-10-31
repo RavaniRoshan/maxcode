@@ -1,0 +1,40 @@
+---
+title: Commands
+description: The maxcode CLI commands, options, and exit codes.
+---
+
+| Command | What it does |
+|---|---|
+| `maxcode run TASK` | Plan, edit, verify, and checkpoint a task |
+| `maxcode plan TASK` | Print the plan without editing |
+| `maxcode undo` | Restore the last checkpoint |
+| `maxcode cost [RUN_ID]` | Show token and cost totals |
+| `maxcode bench` | Run the benchmark suite |
+| `maxcode version` | Print the installed version |
+
+Useful flags: `run --yes`, `run --config PATH`, `run --max-cost USD`,
+`plan --config PATH`, `bench --verifier on|off`, `bench --suite PATH`.
+
+## Exit codes
+
+| Code | Meaning |
+|---:|---|
+| 0 | The task passed |
+| 1 | A check failed or a limit was reached |
+| 2 | The config or command line is wrong |
+| 3 | The provider or engine failed |
+| 4 | The task finished with unverified steps |
+| 130 | The user aborted the run |
+
+## What the verifier runs
+
+The verifier runs the checks named in the plan plus the repository checks it
+detects:
+
+- **Python** — pytest; ruff when configured; compileall for `src/`
+- **Node** — test, lint, and build scripts when present
+- **Rust** — cargo test, cargo build, cargo clippy
+- **Go** — go test, go build, go vet
+
+A step with zero checks ends as **unverified**, not done. The run summary lists
+every unverified step.
