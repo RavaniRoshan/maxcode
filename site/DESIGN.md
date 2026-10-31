@@ -1,7 +1,7 @@
 # maxcode site: design system
 
 Canonical URL: <https://ravaniroshan.github.io/maxcode/>
-Docs: <https://ravaniroshan.github.io/maxcode/docs>
+Docs: <https://ravaniroshan.github.io/maxcode/docs/>
 The documentation framework is [Fumadocs](https://www.fumadocs.dev/).
 
 The visual language follows Fumadocs' neutral system: Geist + JetBrains Mono,

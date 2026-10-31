@@ -7,7 +7,7 @@ Date: 2026-10-31
 Canonical source: [`site/`](../site/) in `RavaniRoshan/maxcode`.
 
 - Marketing URL: <https://ravaniroshan.github.io/maxcode/>
-- Documentation URL: <https://ravaniroshan.github.io/maxcode/docs>
+- Documentation URL: <https://ravaniroshan.github.io/maxcode/docs/>
 - Deploy workflow: [`../.github/workflows/pages.yml`](../.github/workflows/pages.yml)
 - Design source of truth: [`../site/DESIGN.md`](../site/DESIGN.md)
 - Archived alternative: `RavaniRoshan/maxcodesite`, with `ARCHIVED.md` and its
@@ -24,6 +24,8 @@ deployed or linked.
 - `content/docs/*.mdx` — overview, quickstart, providers, commands, run loop,
   checkpoints, cost, benchmark, security, legal
 - Fumadocs sidebar, search, table of contents, MDX, and static export
+- `trailingSlash: true`, so the export writes `docs/index.html`,
+  `docs/quickstart/index.html`, and every URL resolves on a static host
 - neutral theme, Geist + JetBrains Mono, self-hosted font files in `_next`
 - build: `BASE_PATH=/maxcode npm run build` from `site/docs`
 - merge: `site/build.sh` copies the static marketing files and the Fumadocs
@@ -81,8 +83,8 @@ Lighthouse 12, local Pages-shaped build, light and forced dark:
 | Page | Light | Dark |
 |---|---:|---:|
 | marketing `/` | 1.00 | 1.00 |
-| docs index `/docs` | 1.00 | 1.00 |
-| docs quickstart `/docs/quickstart` | 1.00 | 1.00 |
+| docs index `/docs/` | 1.00 | 1.00 |
+| docs quickstart `/docs/quickstart/` | 1.00 | 1.00 |
 | benchmark `/benchmark.html` | 1.00 | 1.00 |
 
 Command shape:

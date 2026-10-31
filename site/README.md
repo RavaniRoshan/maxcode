@@ -1,7 +1,7 @@
 # Canonical maxcode site
 
 - Live URL: <https://ravaniroshan.github.io/maxcode/>
-- Documentation: <https://ravaniroshan.github.io/maxcode/docs>
+- Documentation: <https://ravaniroshan.github.io/maxcode/docs/>
 - Deploy source: this folder, via [`../.github/workflows/pages.yml`](../.github/workflows/pages.yml)
 - Design source of truth: [`DESIGN.md`](DESIGN.md)
 - Archived alternative: <https://ravaniroshan.github.io/maxcodesite/> (source: `RavaniRoshan/maxcodesite`)
@@ -43,7 +43,7 @@ Preview the exact Pages layout by serving a parent directory:
 mkdir -p /tmp/maxcode-pages
 cp -r dist /tmp/maxcode-pages/maxcode
 python3 -m http.server 8765 --directory /tmp/maxcode-pages
-# open http://127.0.0.1:8765/maxcode/ and /maxcode/docs
+# open http://127.0.0.1:8765/maxcode/ and /maxcode/docs/
 ```
 
 ## Verification
