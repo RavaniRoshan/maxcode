@@ -275,22 +275,25 @@ section { padding: 48px 0; }
 }
 .copy:hover { color: var(--text); border-color: var(--silver); }
 
+/* The terminal keeps its dark ground in both themes: DESIGN's terminal palette
+   (silver paths, slate steps, white pass) only clears contrast on dark. */
 .terminal {
-  background: var(--surface);
-  border: 1px solid var(--border);
+  background: #0E1422;
+  border: 1px solid #1E2A40;
   border-radius: 6px;
   padding: 24px;
   overflow-x: auto;
+  color: #F5F7FA;
   font-family: var(--mono);
   font-size: 14px;
   line-height: 1.85;
 }
-.terminal .prompt { color: var(--muted); }
-.terminal .step { color: var(--slate); }
-.terminal .path { color: var(--silver); }
-.terminal .pass { color: var(--silver-hi); font-weight: 600; }
-.terminal .fail { color: var(--red); font-weight: 600; }
-.terminal .dim { color: var(--muted); }
+.terminal .prompt { color: #8D99AB; }
+.terminal .step { color: #94A3B8; }
+.terminal .path { color: #D9DEE5; }
+.terminal .pass { color: #FFFFFF; font-weight: 600; }
+.terminal .fail { color: #F87171; font-weight: 600; }
+.terminal .dim { color: #8D99AB; }
 
 /* Chips */
 .chip {

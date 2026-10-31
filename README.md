@@ -18,6 +18,8 @@
   <img src="https://img.shields.io/badge/status-v0.1.0--alpha.1-8D99AB.svg" alt="v0.1.0-alpha.1">
 </p>
 
+<p align="center"><a href="https://ravaniroshan.github.io/maxcode/">Website</a></p>
+
 ---
 
 ## The problem
