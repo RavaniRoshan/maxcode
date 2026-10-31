@@ -31,12 +31,13 @@ deployed or linked.
 
 ## Design system
 
-The marketing pages use the same neutral primitives as Fumadocs:
+The marketing pages use the same `--color-fd-*` tokens as Fumadocs'
+`neutral.css`:
 
-- light `#F5F5F5` ground, `#0A0A0A` foreground, `#F1F1F1` cards,
-  `rgba(0,0,0,.16)` borders;
-- dark `#121212` ground, `#EDEDED` foreground, `#191919` cards,
-  `rgba(255,255,255,.14)` borders;
+- light `hsl(0,0%,96%)` ground, `hsl(0,0%,3.9%)` foreground,
+  `hsl(0,0%,94.7%)` cards, `hsla(0,0%,80%,50%)` borders;
+- dark `hsl(0,0%,7.04%)` ground, `hsl(0,0%,92%)` foreground,
+  `hsl(0,0%,9.8%)` cards, `hsla(0,0%,40%,20%)` borders;
 - Geist for display/body, JetBrains Mono for code, labels, and numbers;
 - 56px blurred sticky nav, 1400px layout, pill buttons, 16/24px rounded cards;
 - one dark terminal panel that keeps DESIGN's silver/slate/white code palette.
@@ -55,7 +56,7 @@ WCAG 2.1 ratios for the shipped token pairs:
 | light muted / card | 5.65 |
 | light success / card | 6.31 |
 | light danger / card | 5.73 |
-| dark foreground / background | 16.00 |
+| dark foreground / background | 15.71 |
 | dark muted / background | 8.93 |
 | dark muted / card | 8.39 |
 | dark success / card | 10.09 |

@@ -159,6 +159,22 @@
       </div>
     </section>
 
+    <section class="section wrap" id="architecture">
+      <div class="section-head">
+        <p class="eyebrow">architecture</p>
+        <h2>The plan never owns the exit code.</h2>
+      </div>
+      <div class="flow-card" aria-label="Planner to worker to verifier to checkpoint">
+        <div class="flow-node"><span>01 / plan</span><strong>Planner</strong><small>steps + checks</small></div>
+        <span class="flow-arrow" aria-hidden="true">→</span>
+        <div class="flow-node"><span>02 / work</span><strong>Worker</strong><small>edits through the engine</small></div>
+        <span class="flow-arrow" aria-hidden="true">→</span>
+        <div class="flow-node"><span>03 / verify</span><strong>Verifier</strong><small>runs commands, reads exit codes</small></div>
+        <span class="flow-arrow" aria-hidden="true">→</span>
+        <div class="flow-node flow-node-pass"><span>04 / done</span><strong>Checkpoint</strong><small>only after a clean pass</small></div>
+      </div>
+    </section>
+
     <section class="section wrap" id="benchmark">
       <div class="bench-card">
         <div>

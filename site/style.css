@@ -1,32 +1,55 @@
-/* Fumadocs-inspired neutral system: Geist + JetBrains Mono, translucent 1px
-   borders, rounded cards, pill controls, and a dark terminal panel. */
+/* Fumadocs neutral system. Tokens use the --color-fd-* namespace from
+   fumadocs-ui/css/neutral.css; the aliases below keep component CSS short.
+   Muted foreground is darkened from the preset's 45.1% to clear AA on cards. */
 :root {
-  --fd-background: #F5F5F5;
-  --fd-foreground: #0A0A0A;
-  --fd-muted: #EDEDED;
-  --fd-muted-foreground: #5F5F5F;
-  --fd-card: #F1F1F1;
-  --fd-card-foreground: #0A0A0A;
-  --fd-secondary: #EDEDED;
-  --fd-secondary-foreground: #171717;
-  --fd-border: rgba(0, 0, 0, 0.16);
-  --fd-primary: #171717;
-  --fd-primary-foreground: #FAFAFA;
-  --fd-accent: rgba(0, 0, 0, 0.06);
-  --fd-accent-foreground: #0A0A0A;
-  --fd-ring: #8C8C8C;
+  --color-fd-background: hsl(0, 0%, 96%);
+  --color-fd-foreground: hsl(0, 0%, 3.9%);
+  --color-fd-muted: hsl(0, 0%, 96.1%);
+  --color-fd-muted-foreground: #5F5F5F;
+  --color-fd-popover: hsl(0, 0%, 98%);
+  --color-fd-popover-foreground: hsl(0, 0%, 15.1%);
+  --color-fd-card: hsl(0, 0%, 94.7%);
+  --color-fd-card-foreground: hsl(0, 0%, 3.9%);
+  --color-fd-border: hsla(0, 0%, 80%, 50%);
+  --color-fd-primary: hsl(0, 0%, 9%);
+  --color-fd-primary-foreground: hsl(0, 0%, 98%);
+  --color-fd-secondary: hsl(0, 0%, 93.1%);
+  --color-fd-secondary-foreground: hsl(0, 0%, 9%);
+  --color-fd-accent: hsla(0, 0%, 82%, 50%);
+  --color-fd-accent-foreground: hsl(0, 0%, 9%);
+  --color-fd-ring: hsl(0, 0%, 63.9%);
+
+  --fd-background: var(--color-fd-background);
+  --fd-foreground: var(--color-fd-foreground);
+  --fd-muted: var(--color-fd-muted);
+  --fd-muted-foreground: var(--color-fd-muted-foreground);
+  --fd-card: var(--color-fd-card);
+  --fd-card-foreground: var(--color-fd-card-foreground);
+  --fd-secondary: var(--color-fd-secondary);
+  --fd-secondary-foreground: var(--color-fd-secondary-foreground);
+  --fd-border: var(--color-fd-border);
+  --fd-primary: var(--color-fd-primary);
+  --fd-primary-foreground: var(--color-fd-primary-foreground);
+  --fd-accent: var(--color-fd-accent);
+  --fd-accent-foreground: var(--color-fd-accent-foreground);
+  --fd-ring: var(--color-fd-ring);
+
   --success: #166534;
   --danger: #B91C1C;
   --terminal-bg: #0A0A0A;
   --terminal-fg: #EDEDED;
   --terminal-muted: #A3A3A3;
-  --terminal-border: rgba(255, 255, 255, 0.14);
+  --terminal-border: hsla(0, 0%, 40%, 30%);
   --terminal-path: #D9DEE5;
   --terminal-pass: #FFFFFF;
   --terminal-fail: #F87171;
-  --sans: "Geist", system-ui, -apple-system, "Segoe UI", sans-serif;
-  --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  --layout: 1400px;
+  --font-sans: "Geist", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --sans: var(--font-sans);
+  --mono: var(--font-mono);
+  --fd-layout-width: 1400px;
+  --fd-page-width: 760px;
+  --layout: var(--fd-layout-width);
   --nav-height: 56px;
   --radius-sm: 6px;
   --radius-md: 10px;
@@ -37,19 +60,22 @@
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --fd-background: #121212;
-    --fd-foreground: #EDEDED;
-    --fd-muted: #212121;
-    --fd-muted-foreground: #B3B3B3;
-    --fd-card: #191919;
-    --fd-card-foreground: #FAFAFA;
-    --fd-secondary: #212121;
-    --fd-secondary-foreground: #EDEDED;
-    --fd-border: rgba(255, 255, 255, 0.14);
-    --fd-primary: #FAFAFA;
-    --fd-primary-foreground: #171717;
-    --fd-accent: rgba(255, 255, 255, 0.08);
-    --fd-accent-foreground: #EDEDED;
+    --color-fd-background: hsl(0, 0%, 7.04%);
+    --color-fd-foreground: hsl(0, 0%, 92%);
+    --color-fd-muted: hsl(0, 0%, 12.9%);
+    --color-fd-muted-foreground: #B3B3B3;
+    --color-fd-popover: hsl(0, 0%, 11.6%);
+    --color-fd-popover-foreground: hsl(0, 0%, 86.9%);
+    --color-fd-card: hsl(0, 0%, 9.8%);
+    --color-fd-card-foreground: hsl(0, 0%, 98%);
+    --color-fd-border: hsla(0, 0%, 40%, 20%);
+    --color-fd-primary: hsl(0, 0%, 98%);
+    --color-fd-primary-foreground: hsl(0, 0%, 9%);
+    --color-fd-secondary: hsl(0, 0%, 12.9%);
+    --color-fd-secondary-foreground: hsl(0, 0%, 92%);
+    --color-fd-accent: hsla(0, 0%, 40.9%, 30%);
+    --color-fd-accent-foreground: hsl(0, 0%, 90%);
+    --color-fd-ring: hsl(0, 0%, 54.9%);
     --success: #4ADE80;
     --danger: #F87171;
     color-scheme: dark;
@@ -57,19 +83,22 @@
 }
 
 :root[data-theme="dark"] {
-  --fd-background: #121212;
-  --fd-foreground: #EDEDED;
-  --fd-muted: #212121;
-  --fd-muted-foreground: #B3B3B3;
-  --fd-card: #191919;
-  --fd-card-foreground: #FAFAFA;
-  --fd-secondary: #212121;
-  --fd-secondary-foreground: #EDEDED;
-  --fd-border: rgba(255, 255, 255, 0.14);
-  --fd-primary: #FAFAFA;
-  --fd-primary-foreground: #171717;
-  --fd-accent: rgba(255, 255, 255, 0.08);
-  --fd-accent-foreground: #EDEDED;
+  --color-fd-background: hsl(0, 0%, 7.04%);
+  --color-fd-foreground: hsl(0, 0%, 92%);
+  --color-fd-muted: hsl(0, 0%, 12.9%);
+  --color-fd-muted-foreground: #B3B3B3;
+  --color-fd-popover: hsl(0, 0%, 11.6%);
+  --color-fd-popover-foreground: hsl(0, 0%, 86.9%);
+  --color-fd-card: hsl(0, 0%, 9.8%);
+  --color-fd-card-foreground: hsl(0, 0%, 98%);
+  --color-fd-border: hsla(0, 0%, 40%, 20%);
+  --color-fd-primary: hsl(0, 0%, 98%);
+  --color-fd-primary-foreground: hsl(0, 0%, 9%);
+  --color-fd-secondary: hsl(0, 0%, 12.9%);
+  --color-fd-secondary-foreground: hsl(0, 0%, 92%);
+  --color-fd-accent: hsla(0, 0%, 40.9%, 30%);
+  --color-fd-accent-foreground: hsl(0, 0%, 90%);
+  --color-fd-ring: hsl(0, 0%, 54.9%);
   --success: #4ADE80;
   --danger: #F87171;
   color-scheme: dark;
@@ -450,6 +479,38 @@ h3 { font-size: 18px; line-height: 1.35; font-weight: 600; }
 }
 .step-card h3 { font-size: 17px; }
 
+/* Architecture flow */
+.flow-card {
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid var(--fd-border);
+  border-radius: var(--radius-xl);
+  background: var(--fd-card);
+  overflow-x: auto;
+}
+.flow-node {
+  flex: 1;
+  min-width: 150px;
+  padding: 18px;
+  border: 1px solid var(--fd-border);
+  border-radius: var(--radius-lg);
+  background: var(--fd-background);
+}
+.flow-node span {
+  display: block;
+  margin-bottom: 14px;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  color: var(--fd-muted-foreground);
+}
+.flow-node strong { display: block; font-size: 15px; font-weight: 600; }
+.flow-node small { display: block; margin-top: 4px; font-size: 12px; color: var(--fd-muted-foreground); }
+.flow-node-pass { border-color: color-mix(in srgb, var(--success) 55%, var(--fd-border)); }
+.flow-arrow { align-self: center; font-family: var(--mono); color: var(--fd-muted-foreground); }
+
 /* Benchmark */
 .bench-card {
   display: grid;
@@ -573,7 +634,7 @@ tbody tr:last-child td { border-bottom: 0; }
 /* Benchmark page shared pieces */
 .page-head { padding: 64px 0 32px; }
 .page-head h1 { font-size: clamp(36px, 5vw, 52px); }
-.prose { max-width: 760px; }
+.prose { max-width: var(--fd-page-width); }
 .prose p, .prose li { color: var(--fd-muted-foreground); }
 .prose h2 { margin-top: 40px; font-size: 28px; }
 .prose h3 { margin-top: 28px; }
@@ -614,6 +675,8 @@ tbody tr:last-child td { border-bottom: 0; }
   .strip { grid-template-columns: 1fr; gap: 12px; }
   .section { padding: 48px 0; }
   .bench-card, .docs-card { padding: 22px; }
+  .flow-card { flex-direction: column; }
+  .flow-arrow { display: none; }
   .docs-preview { grid-template-columns: 1fr; }
   .docs-side { display: none; }
   .terminal { font-size: 11px; padding: 14px; }

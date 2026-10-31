@@ -12,11 +12,21 @@ plan/verify loop, and a separate engine process owns file edits and commands.
 
 ## Start here
 
-- [Quickstart](/docs/quickstart) — install the CLI and run one verified task.
-- [Providers](/docs/providers) — point maxcode at an OpenAI-compatible Responses endpoint.
-- [Commands](/docs/commands) — the full command and flag list.
-- [How a run works](/docs/how-a-run-works) — planner, worker, verifier, checkpoint.
-- [Benchmark](/docs/benchmark) — method, committed result, and raw logs.
+<Cards>
+  <Card title="Quickstart" description="Install the CLI and run one verified task." href="/docs/quickstart" />
+  <Card title="Providers" description="Point maxcode at an OpenAI-compatible Responses endpoint." href="/docs/providers" />
+  <Card title="Commands" description="The full command, flag, and exit-code reference." href="/docs/commands" />
+  <Card title="How a run works" description="Planner, worker, verifier, checkpoint." href="/docs/how-a-run-works" />
+  <Card title="Benchmark" description="Method, committed result, and raw logs." href="/docs/benchmark" />
+</Cards>
+
+<Callout type="info" title="Evidence, not a claim">
+
+The live run used local Ollama models and a real `pytest` gate. The benchmark
+result is 3/3 in both arms with a 0-point gain, and the verifier-on timeout is
+documented. Read [the benchmark page](/docs/benchmark).
+
+</Callout>
 
 ## What is verified
 

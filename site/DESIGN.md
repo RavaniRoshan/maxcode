@@ -13,17 +13,20 @@ mascot, and a dark terminal panel.
 
 ### Light
 
+Tokens use Fumadocs' `--color-fd-*` namespace, with short `--fd-*` aliases.
+
 | Token | Value | Use |
 |---|---|---|
-| `--fd-background` | `#F5F5F5` | Page ground |
-| `--fd-foreground` | `#0A0A0A` | Headings and body |
-| `--fd-muted-foreground` | `#5F5F5F` | Secondary text (AA on ground and cards) |
-| `--fd-card` | `#F1F1F1` | Cards, panels |
-| `--fd-card-foreground` | `#0A0A0A` | Text on cards |
-| `--fd-secondary` | `#EDEDED` | Secondary buttons, icon tiles |
-| `--fd-border` | `rgba(0,0,0,0.16)` | 1px borders |
-| `--fd-primary` | `#171717` | Primary button |
-| `--fd-primary-foreground` | `#FAFAFA` | Primary button text |
+| `--color-fd-background` | `hsl(0,0%,96%)` | Page ground |
+| `--color-fd-foreground` | `hsl(0,0%,3.9%)` | Headings and body |
+| `--color-fd-muted-foreground` | `#5F5F5F` | Secondary text (AA override of the preset) |
+| `--color-fd-card` | `hsl(0,0%,94.7%)` | Cards, panels |
+| `--color-fd-card-foreground` | `hsl(0,0%,3.9%)` | Text on cards |
+| `--color-fd-secondary` | `hsl(0,0%,93.1%)` | Secondary buttons, icon tiles |
+| `--color-fd-border` | `hsla(0,0%,80%,50%)` | 1px borders |
+| `--color-fd-primary` | `hsl(0,0%,9%)` | Primary button |
+| `--color-fd-primary-foreground` | `hsl(0,0%,98%)` | Primary button text |
+| `--color-fd-ring` | `hsl(0,0%,63.9%)` | Focus ring |
 | `--success` | `#166534` | Pass text |
 | `--danger` | `#B91C1C` | Failure text |
 
@@ -31,15 +34,16 @@ mascot, and a dark terminal panel.
 
 | Token | Value |
 |---|---|
-| `--fd-background` | `#121212` |
-| `--fd-foreground` | `#EDEDED` |
-| `--fd-muted-foreground` | `#B3B3B3` |
-| `--fd-card` | `#191919` |
-| `--fd-card-foreground` | `#FAFAFA` |
-| `--fd-secondary` | `#212121` |
-| `--fd-border` | `rgba(255,255,255,0.14)` |
-| `--fd-primary` | `#FAFAFA` |
-| `--fd-primary-foreground` | `#171717` |
+| `--color-fd-background` | `hsl(0,0%,7.04%)` |
+| `--color-fd-foreground` | `hsl(0,0%,92%)` |
+| `--color-fd-muted-foreground` | `#B3B3B3` |
+| `--color-fd-card` | `hsl(0,0%,9.8%)` |
+| `--color-fd-card-foreground` | `hsl(0,0%,98%)` |
+| `--color-fd-secondary` | `hsl(0,0%,12.9%)` |
+| `--color-fd-border` | `hsla(0,0%,40%,20%)` |
+| `--color-fd-primary` | `hsl(0,0%,98%)` |
+| `--color-fd-primary-foreground` | `hsl(0,0%,9%)` |
+| `--color-fd-ring` | `hsl(0,0%,54.9%)` |
 | `--success` | `#4ADE80` |
 | `--danger` | `#F87171` |
 
