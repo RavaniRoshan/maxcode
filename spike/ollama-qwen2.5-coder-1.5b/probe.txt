@@ -1,0 +1,17 @@
+Provider: local Ollama 0.31.1, http://127.0.0.1:11434
+Model: qwen2.5-coder:1.5b (open weights)
+Date: 2026-10-31
+
+Tool-calling probe, Responses API, non-streaming:
+  POST /v1/responses with one function tool `run_command`.
+  The model returned a normal assistant message whose text was a JSON snippet
+  (`{"name": "run_command", ...}`), not a `function_call` item.
+  Evidence: responses-tool-probe.json.
+
+Tool-calling probe, native /api/chat with the same tool:
+  The model again returned the call as text and no `message.tool_calls`.
+  Evidence: native-chat-tool-probe.json.
+
+Conclusion: this model does not emit structured tool calls in this Ollama build.
+It is not usable as a maxcode worker. The engine would receive a text answer and
+make no file edits.

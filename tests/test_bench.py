@@ -3,10 +3,13 @@
 """Tests for the benchmark runner."""
 
 import json
+import os
 import subprocess
 from pathlib import Path
 
-from maxcode.bench.runner import run_bench
+import pytest
+
+from maxcode.bench.runner import _repo_pythonpath, run_bench
 from maxcode.config import Config
 from maxcode.schemas import RunResult
 
@@ -34,6 +37,17 @@ def make_config() -> Config:
             "worker": {"provider": "main", "model": "m"},
         }
     )
+
+
+def test_repo_pythonpath_adds_and_restores_src(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    src = tmp_path / "src"
+    src.mkdir()
+    monkeypatch.delenv("PYTHONPATH", raising=False)
+    with _repo_pythonpath(tmp_path):
+        assert os.environ["PYTHONPATH"] == str(src)
+    assert "PYTHONPATH" not in os.environ
 
 
 def test_bench_writes_results_and_logs(tmp_path: Path) -> None:

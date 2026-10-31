@@ -1,0 +1,9 @@
+Excerpt from a local logging proxy between maxcode-engine and Ollama 0.31.1.
+Request contained Codex function tools plus a `type: "namespace"` tool and a `type: "web_search"` tool.
+Ollama streamed populated arguments but an empty function name:
+{"name": "", "arguments": "{\"cmd\":\"echo 'def greet(name: str) -\\u003e str: return f'Hello, {name}!'\\\" \\u003e greet.py\",\"justification\":\"Create greet.py with the function definition.\",\"login\":true}", "call_id": "call_8e8pxbpr"}
+{"name": "", "arguments": "{\"cmd\":\"echo 'from greet import greet\\\\n\\\\nassert greet(\\\"maxcode\\\") == \\\"Hello, maxcode!\\\"\\\\nprint(\\\"ok\\\")' \\u003e check_greet.py\",\"justification\":\"Create check_greet.py with the import and assertions.\",\"login\":true}", "call_id": "call_ty66l6xz"}
+{"name": "", "arguments": "{\"cmd\":\"python3 check_greet.py\",\"justification\":\"Run python3 check_greet.py to verify the script works.\",\"login\":true}", "call_id": "call_3w58glvm"}
+
+Engine stderr from the same run:
+ERROR maxcode_core::tools::router: error=unsupported call:

@@ -1,0 +1,2 @@
+steps: 1/1  cost: $0.0000  tokens: 7152 in / 1264 out
+cost is partial: some calls lacked a price or a token count

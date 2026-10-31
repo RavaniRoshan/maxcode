@@ -1,0 +1,14 @@
+Provider: Pollinations AI (anonymous, no key)
+Date: 2026-10-31
+Model reported by the service: gpt-oss-20b (alias "openai")
+Chat Completions endpoint: https://text.pollinations.ai/openai/chat/completions
+Result: HTTP 200, valid choices[0].message.content and usage (see http-body.txt).
+
+Responses endpoint check:
+- POST https://text.pollinations.ai/openai/v1/responses returned HTTP 200 but a
+  chat-completion body (choices[]), not a Responses object or SSE event stream.
+- POST https://text.pollinations.ai/v1/responses returned HTTP 404.
+- The anonymous tier allows one reply every 45 seconds per IP.
+
+Conclusion: usable as a Chat Completions planner, not as a Codex 0.165 engine
+provider, which requires wire_api = "responses".

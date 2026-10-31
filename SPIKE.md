@@ -1,93 +1,72 @@
 # SPIKE: Phase 0
 
-Status: Complete (fork decision; offline end-to-end passed). The engine fork is
-built as `maxcode-engine` 0.1.0 from upstream v0.165.0. Live provider runs remain
-blocked by account credits.
+Status: **complete, live-verified on a local open-weight model.** On 2026-10-31,
+`maxcode-engine` completed multi-turn tool-calling tasks against Ollama 0.31.1
+with `qwen3:1.7b` and `llama3.2:3b`, emitted `turn.completed` usage, and created
+the requested files on disk. The full `maxcode run` loop also passed its
+verifier with both models. The two originally planned OpenRouter models remain unverified because
+no funded key exists in this environment; their exact failure is in section 5.
 
-- Date: 2026-10-29
-- Codex tag: `rust-v0.165.0`
-- Codex commit: `360319d`
-- Task repository: `/tmp/opencode/t0/<model>/repo` (temporary; logs will be copied into `spike/`)
+- Date of live runs: 2026-10-31
+- Engine: `maxcode-engine` 0.1.0, built from Codex `rust-v0.165.0` (commit `360319d`)
+- Stock comparison: `@openai/codex` 0.165.0 from npm, run in a temporary prefix
+- Local provider: Ollama 0.31.1 at `http://127.0.0.1:11434/v1`
+- Raw evidence: [`spike/`](spike/)
 
 ## 1. Wrapper or fork
 
-Decision: **fork** (minimal). The wrapper approach was provisional; the project now ships a minimal fork named `maxcode-engine` built from Codex v0.165.0.
+Decision: **fork is available, but it is not required.** The engine adapter now
+selects, in order:
 
-Codex supports user-defined OpenAI-compatible providers through `model_providers.<id>` in the user config, and the provider can be selected with `model_provider`. The provider entry supports `base_url`, `env_key`, and `wire_api`. No Codex source change is needed to point it at a custom URL.
+1. `MAXCODE_ENGINE_BIN`, when set.
+2. `maxcode-engine` on `PATH`.
+3. `codex` on `PATH`, when its `--version` is 0.165.0 or newer.
 
-Source path:
+Stock Codex 0.165.0 accepts a custom OpenAI-compatible provider through
+`model_providers.<id>` with `wire_api = "responses"`. Stock Codex and
+`maxcode-engine` produced the same event types on the same live task (section 8).
+The fork remains useful only if a future Codex change blocks a provider we need,
+or if we need to patch the engine itself.
 
-- `codex-rs/config/src/config_toml.rs`: `model_provider` and `model_providers` fields.
-- `codex-rs/core/src/config/mod.rs`: merges built-in providers with configured providers, then selects `model_provider_id`.
-- `codex-rs/model-provider-info/src/lib.rs`: `ModelProviderInfo` fields, `api_key()` reads the environment variable, and `to_api_provider()` builds the HTTP provider.
+Codex source paths:
 
-OpenRouter's own `Ori` harness already ships a Codex launcher with the same provider shape. The installed `ori` binary (v0.15.x) builds this command line for `ori codex`:
+- `maxcode-rs/config/src/config_toml.rs`: `model_provider` and `model_providers`.
+- `maxcode-rs/core/src/config/mod.rs`: merges built-in providers with configured
+  providers, then selects `model_provider_id`.
+- `maxcode-rs/model-provider-info/src/lib.rs`: `ModelProviderInfo` fields,
+  `api_key()` reads the environment variable, and `to_api_provider()` builds the
+  HTTP provider. This file also lists `ollama` as a reserved built-in provider ID.
 
-```text
--c model_provider=openrouter
--c model_providers.openrouter.name='OpenRouter'
--c model_providers.openrouter.base_url='https://openrouter.ai/api/v1'
--c model_providers.openrouter.wire_api='responses'
--c model_providers.openrouter.env_http_headers.X-Session-Id='ORI_OPENROUTER_SESSION_ID'
--c model_providers.openrouter.auth.command='sh'
--c model_providers.openrouter.auth.args=['-c','echo $OPENROUTER_API_KEY']
--m <model>
--c model_reasoning_effort=<effort>
-```
+OpenRouter's own `Ori` harness ships a Codex launcher with the same provider
+shape. That is evidence that stock Codex plus a custom Responses provider is a
+supported combination. Our runner uses `env_key` instead of `auth.command`; both
+are supported by the Codex source, and `env_key` avoids spawning a shell to print
+a secret.
 
-That is confirmation from OpenRouter's own tooling that stock Codex plus OpenRouter's Responses API is a supported combination, and it uses the same `model_providers.openrouter` entry. Our runner uses `env_key` instead of an `auth.command`; both are supported by the Codex source, and `env_key` avoids spawning a shell to print the secret.
-
-This is not final until both models complete a multi-turn tool-calling task. The compatibility risk is real:
+The compatibility risk is real and version-specific:
 
 - Codex `v0.165.0` removed `wire_api = "chat"`. Only the Responses API is supported.
-- OpenRouter exposes a Responses API at `https://openrouter.ai/api/v1/responses`, and both chosen models advertise tool support.
-- OpenRouter's Responses API is stateless. Codex sends `store: false`, which matches that requirement.
-- OpenRouter requires `id` and `status` on assistant messages in later turns. Codex has optional `id`/`status` fields and may omit them. A live multi-turn run must prove this is accepted.
-
-If the live test fails, the fallback order is:
-
-1. Pin an older Codex tag that still supports Chat Completions, if one is compatible with the chosen models.
-2. Fork Codex and add the provider/wire change. The first patch must stay under 500 changed lines.
-3. Use a translation proxy only if the first two options fail.
-
-### Wire-format dry run against a strict mock (2026-10-29)
-
-The two live model runs are still blocked on the API key, so the wire format was tested against a local mock of the OpenRouter Responses API. The mock rejects `store` values other than `false` and rejects any assistant message replayed in a later turn that is missing `id` or `status`. It logs every request body.
-
-Result with the Codex binary already installed on this machine (`codex-cli 0.163.0`):
-
-```text
-exit=0
-{"type":"item.completed","item":{"id":"item_2","type":"agent_message","text":"I will create the file now."}}
-{"type":"item.started","item":{"id":"item_3","type":"command_execution","command":"/bin/bash -lc \"printf 'hello from mock\\n' > hello.txt\"",...}}
-{"type":"item.completed","item":{"id":"item_3","type":"command_execution",...,"exit_code":0,"status":"completed"}}
-{"type":"turn.completed","usage":{"input_tokens":84,"cached_input_tokens":0,"cache_write_tokens":0,"output_tokens":14,"reasoning_output_tokens":0}}
-```
-
-Observations from the captured requests:
-
-- Both requests sent `store: false` and `stream: true`.
-- Request 2 replayed the assistant preamble as `{"type":"message","status":"completed","id":"msg_mock_preamble","role":"assistant",...}`. The `id` and `status` survived the round trip, so the documented OpenRouter requirement is satisfied when the provider supplies both fields.
-- The `function_call` item and the `function_call_output` item round-tripped with the same `call_id`.
-- Codex executed the tool call and produced a second model turn, so the multi-turn path works.
-- `turn.completed` reported usage in the shape Codex documents.
-
-This is not a substitute for the live OpenRouter run. It removes the wire-format objection, but it used Codex `0.163.0`, not the required source build of `v0.165.0`, and it did not prove either model emits usable tool calls. The same mock test must be repeated with the built binary, followed by the two live runs.
-
-OpenRouter's published OpenAPI document (`https://openrouter.ai/openapi.json`, fetched 2026-10-29) was also checked against the request Codex sends. Every field in the captured request maps to the schema:
-
-- `store` is `const: false`.
-- `include` accepts `reasoning.encrypted_content`.
-- `prompt_cache_key`, `parallel_tool_calls`, `tool_choice`, `stream`, and `reasoning` are defined fields.
-- `reasoning.effort` accepts `max`, `xhigh`, `high`, `medium`, `low`, `minimal`, `none`, or null.
-- `tools` accepts function tools with `defer_loading` and `output_schema`, `namespace` tools, and `web_search` server tools.
-- `previous_response_id` is explicitly rejected when non-null, which matches Codex sending `store: false` and full history.
-
-The only captured field not named in the schema is `client_metadata`. The request object does not set `additionalProperties: false`, so it is allowed. OpenRouter's own Codex launcher sends the same Codex payload, which is further evidence that the field is accepted.
+  Source: `model-provider-info/src/lib.rs`, `CHAT_WIRE_API_REMOVED_ERROR`.
+- `ollama` is a reserved built-in provider ID. A custom entry named `ollama` fails
+  at config load. Use another id, for example `ollama-local`.
+- Ollama 0.31.1 rejects `reasoning.effort = "minimal"` and accepts
+  `none`, `low`, `medium`, `high`, or `max`.
+- Ollama 0.31.1 loses function names when the Codex request contains a
+  `type: "namespace"` tool (`multi_agent_v1`) or a `type: "web_search"` tool.
+  The engine then logs `unsupported call:`. Disabling both tools fixes it.
+  Evidence: `spike/ollama-qwen3-1.7b/streaming-name-bug.txt`.
+- Ollama 0.31.1 drops some function calls when the model spends its streamed
+  output budget on long reasoning. Setting `model_reasoning_effort = "none"`
+  avoids that path and produced stable tool calls.
+- The Responses API is stateless. Codex sends `store: false`, which matches it.
+- OpenRouter requires `id` and `status` on assistant messages in later turns.
+  Codex includes them when the provider supplies them; the local Ollama run
+  round-tripped the conversation without that requirement.
 
 ## 2. Exact non-interactive command and flags
 
-The source-built binary is used through `codex exec`:
+The live command is `exec --json`, using the custom-provider shape from the
+original spike plus the Ollama compatibility overrides:
 
 ```bash
 MAXCODE_HOME="$RUN_DIR/maxcode-home" \
@@ -97,31 +76,43 @@ MAXCODE_HOME="$RUN_DIR/maxcode-home" \
   -C "$REPO" \
   -s workspace-write \
   -m "$MODEL" \
-  -c model_provider=openrouter \
-  -c 'model_providers.openrouter.name="OpenRouter"' \
-  -c 'model_providers.openrouter.base_url="https://openrouter.ai/api/v1"' \
-  -c 'model_providers.openrouter.env_key="OPENROUTER_API_KEY"' \
-  -c 'model_providers.openrouter.wire_api="responses"' \
+  -c model_provider=ollama-local \
+  -c 'model_providers.ollama-local.name="Ollama local"' \
+  -c 'model_providers.ollama-local.base_url="http://127.0.0.1:11434/v1"' \
+  -c 'model_providers.ollama-local.env_key="OLLAMA_API_KEY"' \
+  -c 'model_providers.ollama-local.wire_api="responses"' \
   -c "model_context_window=$CONTEXT" \
-  -c 'model_reasoning_effort="minimal"' \
+  -c 'model_reasoning_effort="none"' \
+  -c 'web_search="disabled"' \
+  -c agents.enabled=false \
   "$PROMPT"
 ```
 
-Flag sources:
+Flag sources (confirmed from `exec --help` and the source):
 
-- `codex-rs/exec/src/cli.rs`: `--json`, `--skip-git-repo-check`, `-C`, `-s`, `-m`, `-c`.
-- `codex-rs/utils/cli/src/shared_options.rs`: `-C`, `-s`, `-m`, `-c`.
-- `codex-rs/utils/cli/src/config_override.rs`: `-c key=value`; the value is parsed as TOML, with a raw-string fallback.
+- `maxcode-rs/exec/src/cli.rs`: `--json`, `--skip-git-repo-check`, `-C`, `-s`,
+  `-m`, `-c`.
+- `maxcode-rs/utils/cli/src/shared_options.rs`: `-C`, `-s`, `-m`, `-c`.
+- `maxcode-rs/utils/cli/src/config_override.rs`: `-c key=value`; the value is
+  parsed as TOML, with a raw-string fallback.
+- `maxcode-rs/config/src/config_toml.rs`: `web_search`, `agents.enabled`.
+- `maxcode-rs/core/src/client.rs`: `model_reasoning_effort`; `stream` is always
+  true for the Responses API.
 
-`model_reasoning_effort` is set to `minimal`, not `none`. OpenRouter's Responses API documents `minimal`, `low`, `medium`, and `high`; `none` is not in its documented set, even though Codex accepts it. A mock run confirmed Codex emits `reasoning: {"effort": "minimal", "summary": "auto"}` for this setting. If OpenRouter rejects the `reasoning` object for a non-reasoning model, the fallback is to omit the override entirely; Codex then sends `reasoning: {"summary": "auto"}`.
+`--oss --local-provider ollama` also exists in `exec --help`, but the live
+evidence here uses the explicit custom-provider shape above. The built-in path
+uses the same Responses wire API and therefore has the same Ollama limitations.
 
-When the engine adapter calls Codex from Python, it must set `stdin=subprocess.DEVNULL`. Without that, Codex prints `Reading additional input from stdin...` and waits for input when the parent process is not a TTY.
+When the engine adapter calls Codex from Python it sets `stdin=subprocess.DEVNULL`.
+Without that, Codex prints `Reading additional input from stdin...` and waits for
+input when the parent process is not a TTY. That line still appears on stderr in
+some runs, but the process does not block.
 
 ## 3. Does Codex report token counts?
 
-Yes, source-confirmed.
+Yes, confirmed live.
 
-`codex exec --json` emits a `turn.completed` event. Its `usage` object contains:
+`exec --json` emits a `turn.completed` event. Its `usage` object contains:
 
 - `input_tokens`
 - `cached_input_tokens`
@@ -131,36 +122,141 @@ Yes, source-confirmed.
 
 Source: `codex-rs/exec/src/exec_events.rs`, `TurnCompletedEvent` and `Usage`.
 
-The live OpenRouter logs must confirm that OpenRouter returns usage in the shape Codex expects.
+Live values from `spike/ollama-qwen3-1.7b/hello-engine/stdout.jsonl`:
+
+```text
+{"type":"turn.completed","usage":{"input_tokens":8204,"cached_input_tokens":0,"cache_write_input_tokens":0,"output_tokens":202,"reasoning_output_tokens":0}}
+```
+
+The full `maxcode run` log records `tokens_in: 7152`, `tokens_out: 1264`, and
+`cost_usd: 0.0000` with `partial` cost reporting, because the config has no
+`[pricing]` entry for the local model. The token counts are real; the dollar
+amount is not an API bill.
 
 ## 4. How to pass the provider URL and key
 
-- Provider URL: `model_providers.openrouter.base_url = "https://openrouter.ai/api/v1"`.
-- Key: `model_providers.openrouter.env_key = "OPENROUTER_API_KEY"`. Codex reads the variable from the child process environment at request time. The key never enters a config file, the repository, or the run log.
-- Wire API: `model_providers.openrouter.wire_api = "responses"`. `chat` is a hard error in this Codex version.
-- Auth: `requires_openai_auth` defaults to `false`, so no ChatGPT login is needed for this provider.
-- Config location: project `.codex/config.toml` is not allowed to override `model_provider` or `model_providers`. The adapter must use CLI `-c` overrides or a dedicated `CODEX_HOME` with a user-level `config.toml`.
-- The `-c` parser accepts TOML. Individual dotted keys avoid quoting problems with a large inline table.
+- Provider URL: `model_providers.<id>.base_url = "http://127.0.0.1:11434/v1"`.
+- Key: `model_providers.<id>.env_key = "OLLAMA_API_KEY"`. Codex reads the
+  variable from the child process environment at request time. The key never
+  enters a config file, the repository, or the run log. Ollama ignores the value,
+  so the live runs used the placeholder `local`.
+- Wire API: `model_providers.<id>.wire_api = "responses"`. `chat` is a hard error
+  in Codex 0.165.
+- Auth: `requires_openai_auth` defaults to `false`, so no ChatGPT login is needed.
+- Config location: project `.codex/config.toml` is not allowed to override
+  `model_provider` or `model_providers`. The adapter uses CLI `-c` overrides and
+  a dedicated `MAXCODE_HOME`.
+- Context: `model_context_window=16384` matches the small local models used here.
+  The adapter reads `MAXCODE_MODEL_CONTEXT_WINDOW` and omits the override when
+  the variable is unset.
+- Reasoning: the adapter defaults to `low` and reads `MAXCODE_REASONING_EFFORT`.
+  The live runs set `none`.
 
-## Run log: model 1
+## 5. Live provider attempt matrix (2026-10-31)
 
-Model: `qwen/qwen3-coder-next`
+| Provider | Model | Endpoint | Result | Evidence |
+|---|---|---|---|---|
+| OpenRouter | `qwen/qwen3-coder-next` | `https://openrouter.ai/api/v1` | No credential in env; engine exits 1 with `Missing environment variable: OPENROUTER_API_KEY`. Unauthenticated HTTP probe: 401 `No cookie auth credentials found`. | `spike/openrouter-qwen3-coder-next/` |
+| Hugging Face Router | `Qwen/Qwen2.5-1.5B-Instruct` | `https://router.huggingface.co/v1` | No credential in env; engine exits 1 with `Missing environment variable: HF_TOKEN`. Unauthenticated HTTP probe: 401 (HTML login page). | `spike/huggingface-qwen2.5-1.5b/` |
+| DeepSeek | `deepseek-chat` | `https://api.deepseek.com/v1` | No credential in env; engine exits 1 with `Missing environment variable: DEEPSEEK_API_KEY`. Unauthenticated HTTP probe: 401 `Authentication Fails (governor)`. | `spike/deepseek-deepseek-chat/` |
+| Pollinations AI | `gpt-oss-20b` (`openai`) | `https://text.pollinations.ai/openai` | Chat Completions works anonymously (HTTP 200). Its `/v1/responses` path returns a chat-completion body, and `/v1/responses` returns 404, so it cannot serve Codex 0.165. Anonymous tier: one reply per 45 s. | `spike/pollinations-gpt-oss-20b/` |
+| Ollama 0.31.1 | `qwen3:1.7b` | `http://127.0.0.1:11434/v1` | **Success.** Multi-turn tool calls, `turn.completed` usage, `hello.txt` created, full loop passed. | `spike/ollama-qwen3-1.7b/` |
+| Ollama 0.31.1 | `llama3.2:3b` | `http://127.0.0.1:11434/v1` | **Success.** Multi-turn tool calls, `turn.completed` usage, `hello.txt` created, full loop passed. | `spike/ollama-llama3.2-3b/` |
+| Ollama 0.31.1 | `qwen2.5-coder:1.5b` | `http://127.0.0.1:11434/v1` | Model does not emit structured tool calls; it returns the call as text. Not usable as a worker. | `spike/ollama-qwen2.5-coder-1.5b/` |
 
-Status: Pending live run.
+The earlier OpenRouter HTTP 402 (`insufficient credits`) is retained in the
+history below. It cannot be re-run without the original key, and no key is
+present in this environment.
 
-Task prompt:
+## Run log: model 1 (success)
+
+Model: `qwen3:1.7b` (open weights) via Ollama 0.31.1.
+
+Raw engine task:
 
 ```text
-Create a file named greet.py with a function greet(name: str) -> str that returns "Hello, {name}!". Create check_greet.py that imports greet, asserts greet("maxcode") == "Hello, maxcode!", prints "ok", and exits 0. Run python3 check_greet.py and confirm it prints "ok". Only change those two files.
+Create a file named hello.txt containing exactly the text hello and nothing else.
+Run cat hello.txt and confirm the output is hello. Only change hello.txt.
 ```
 
-## Run log: model 2
+Result (`spike/ollama-qwen3-1.7b/hello-engine/`):
 
-Model: `deepseek/deepseek-v3.2`
+- exit code 0
+- two `command_execution` items: `echo hello > hello.txt` and `cat hello.txt`
+- `turn.completed` usage: 8204 input tokens, 202 output tokens
+- `hello.txt` exists on disk and contains `hello`
+- event sequence: `thread.started`, `turn.started`, `command_execution` x2,
+  `agent_message`, `turn.completed`
 
-Status: Pending live run.
+Full loop (`spike/ollama-qwen3-1.7b/maxcode-run/`):
 
-Task prompt: same as model 1.
+- planner: Pollinations `gpt-oss-20b` (Chat Completions)
+- worker: `qwen3:1.7b` through `maxcode-engine`
+- verifier: `python -m pytest -q`
+- command: `maxcode run --yes --config maxcode-live.toml "Edit app.py so add(a, b)
+  returns a + b ..."`
+- result: exit 0, `steps: 1/1`, check `test` passed (`1 passed in 0.01s`),
+  `run_end.passed = true`, `app.py` changed from `return a - b` to `return a + b`
+- tokens: 7152 input, 1264 output; dollar cost `0.0000` (no pricing entry,
+  reported as partial)
+
+## Run log: model 2 (success)
+
+Model: `llama3.2:3b` (open weights) via Ollama 0.31.1.
+
+Raw engine task: the same `hello.txt` task as model 1. Result
+(`spike/ollama-llama3.2-3b/hello-engine/`):
+
+- exit code 0
+- three `command_execution` items, including `echo hello > hello.txt` and
+  `cat hello.txt`
+- `turn.completed` usage: 2625 input tokens, 309 output tokens
+- `hello.txt` exists on disk and contains `hello`
+
+Full loop (`spike/ollama-llama3.2-3b/maxcode-run/`):
+
+- planner: Pollinations `gpt-oss-20b`
+- worker: `llama3.2:3b` through `maxcode-engine`
+- verifier: `python -m pytest -q`
+- result: exit 0, `steps: 1/1`, check `test` passed, `run_end.passed = true`,
+  `app.py` changed from `return a - b` to `return a + b`
+- tokens: 7182 input, 1067 output; dollar cost `0.0000` (partial)
+
+## Run log: model 3 (tool-call failure)
+
+Model: `qwen2.5-coder:1.5b` (open weights) via Ollama 0.31.1.
+
+The model returned a normal assistant message whose text was a JSON snippet
+(`{"name": "run_command", "arguments": ...}`), not a `function_call` item. The
+native `/api/chat` tool probe behaved the same way: no `message.tool_calls`.
+Evidence: `spike/ollama-qwen2.5-coder-1.5b/responses-tool-probe.json` and
+`native-chat-tool-probe.json`.
+
+Conclusion: the model is not usable as a maxcode worker in this Ollama build.
+The failure is the model, not the wire format: `qwen3:1.7b` emitted proper
+`function_call` items through the same endpoint.
+
+## Engine comparison: stock Codex 0.165 vs maxcode-engine 0.1.0
+
+Same task, same model, same provider settings:
+
+- Stock: `@openai/codex` 0.165.0 from npm, `CODEX_HOME` in a temp directory.
+- Fork: `maxcode-engine` 0.1.0, `MAXCODE_HOME` in a temp directory.
+
+Both exited 0, created `hello.txt` containing `hello`, and emitted
+`turn.completed`. The event-type sequences are identical
+(`spike/engine-comparison/event-types.diff`); the only difference was an extra
+failed `nano hello.txt` command in the stock run, which is a model choice, not a
+schema difference.
+
+| Binary | Input tokens | Output tokens | File created |
+|---|---:|---:|---|
+| stock Codex 0.165.0 | 10491 | 182 | yes |
+| maxcode-engine 0.1.0 | 8204 | 202 | yes |
+
+The adapter's unit tests cover all three selection paths:
+`MAXCODE_ENGINE_BIN`, `maxcode-engine` on `PATH`, and `codex` 0.165+ on `PATH`.
+A `codex` older than 0.165 is rejected with an actionable error.
 
 ## Assumption A1: GitHub search
 
@@ -175,35 +271,34 @@ Searches run on 2026-10-29:
 
 A web search also found:
 
-- Aider's internal verify-fix loop. It is a feature of the agent, not an independent pass/fail gate that owns task completion.
+- Aider's internal verify-fix loop. It is a feature of the agent, not an
+  independent pass/fail gate that owns task completion.
 - A pydantic-ai feature request for a `VerificationLoop` capability.
 - `verifier-gate`, a small project that only ships what a program verifies.
 - An article describing an OpenCode + CI verification gate pattern.
 
-Conclusion: A1 holds for mainstream open coding CLIs. The idea exists in components and small projects, so the public claim must be precise: **no widely used open coding CLI makes an independent pass/fail gate its core product**. The benchmark should test the claimed advantage, not absolute novelty.
+Conclusion: A1 holds for mainstream open coding CLIs. The idea exists in
+components and small projects, so the public claim must be precise: **no widely
+used open coding CLI makes an independent pass/fail gate its core product**.
+The benchmark should test the claimed advantage, not absolute novelty.
 
 ## Blockers
 
-- The supplied OpenRouter key returned HTTP 402 (insufficient credits). Free
-  model slugs returned HTTP 404. Live T0 runs need a funded key or another
-  OpenAI-compatible endpoint.
+- The originally supplied OpenRouter key returned HTTP 402 (insufficient
+  credits), and free model slugs returned HTTP 404. No funded OpenRouter,
+  Hugging Face, or DeepSeek credential is present in this environment.
+- Live runs on `qwen/qwen3-coder-next` and `deepseek/deepseek-v3.2` therefore
+  remain unverified. The local Ollama runs in this file are the substitute
+  evidence, and they use open-weight models.
+- Ollama 0.31.1's streaming Responses implementation is not fully compatible
+  with Codex when non-function tools or long reasoning are present. The working
+  configuration is documented in sections 1 and 2. A production adapter for
+  Ollama should keep those overrides.
 
 ## T0 completion note
 
-Live runs on `qwen/qwen3-coder-next` and `deepseek/deepseek-v3.2` were skipped
-because the supplied key had no usable credits. The wire format was validated
-against a strict local Responses API mock, and the full CLI loop was exercised
-offline on 2026-10-30:
-
-- `maxcode-engine 0.1.0` linked from the `dev-small` profile.
-- `maxcode-engine exec --json` ran a mocked `exec_command`, created `hello.txt`,
-  and emitted `turn.completed` usage.
-- `maxcode run --yes` planned through a mocked `/chat/completions`, edited a
-  buggy `app.py` through the engine, passed `pytest`, and wrote a checkpoint
-  under `refs/maxcode/`.
-- The Python suite passed (108 tests), with ruff and mypy clean.
-
-Engine binary used for the offline run:
-`/home/shiva/projects/maxcode-engine/maxcode-rs/target/dev-small/maxcode-engine`.
-When a funded key is available, run the exact command in section 2 with
-`MAXCODE_ENGINE_BIN` pointing at that binary.
+T0's exit rule was "one task completes on a non-OpenAI model". That is now met:
+`qwen3:1.7b` completed a coding task through `maxcode-engine`, and the full
+`maxcode run` loop closed a step only after `pytest` passed. The run was local,
+free of API charges, and used temp directories only. No key was written to a
+file, log, checkpoint, or commit.

@@ -9,7 +9,7 @@ from pathlib import Path
 import pytest
 
 from maxcode.config import ProviderConfig
-from maxcode.engine.runner import run_step
+from maxcode.engine.runner import _binary, _build_command, run_step
 from maxcode.errors import EngineError
 from maxcode.schemas import EngineResult
 
@@ -18,6 +18,71 @@ FAKE_ENGINE = Path(__file__).parent / "fixtures" / "fake_engine.py"
 
 def make_provider() -> ProviderConfig:
     return ProviderConfig(base_url="https://api.example.com/v1", api_key_env="MAXCODE_TEST_KEY")
+
+
+def write_executable(path: Path, body: str) -> Path:
+    path.write_text(body, encoding="utf-8")
+    path.chmod(0o755)
+    return path
+
+
+def test_engine_binary_prefers_env_override(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setenv("MAXCODE_ENGINE_BIN", str(FAKE_ENGINE))
+    monkeypatch.setenv("PATH", str(tmp_path))
+    assert _binary() == str(FAKE_ENGINE)
+
+
+def test_engine_binary_finds_maxcode_engine_on_path(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    binary = write_executable(tmp_path / "maxcode-engine", "#!/bin/sh\nexit 0\n")
+    monkeypatch.delenv("MAXCODE_ENGINE_BIN", raising=False)
+    monkeypatch.setenv("PATH", str(tmp_path))
+    assert _binary() == str(binary)
+
+
+def test_engine_binary_falls_back_to_codex_0165(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    binary = write_executable(
+        tmp_path / "codex",
+        '#!/bin/sh\n[ "$1" = "--version" ] && echo "codex-cli 0.165.0"\nexit 0\n',
+    )
+    monkeypatch.delenv("MAXCODE_ENGINE_BIN", raising=False)
+    monkeypatch.setenv("PATH", str(tmp_path))
+    assert _binary() == str(binary)
+
+
+def test_engine_binary_rejects_old_codex(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    write_executable(
+        tmp_path / "codex",
+        '#!/bin/sh\n[ "$1" = "--version" ] && echo "codex-cli 0.163.0"\nexit 0\n',
+    )
+    monkeypatch.delenv("MAXCODE_ENGINE_BIN", raising=False)
+    monkeypatch.setenv("PATH", str(tmp_path))
+    with pytest.raises(EngineError, match="too old"):
+        _binary()
+
+
+def test_engine_command_uses_local_compat_overrides(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("MAXCODE_REASONING_EFFORT", "none")
+    monkeypatch.setenv("MAXCODE_MODEL_CONTEXT_WINDOW", "16384")
+    command = _build_command("engine", Path("/tmp/repo"), make_provider(), "m", "prompt")
+    assert 'model_reasoning_effort="none"' in command
+    assert 'web_search="disabled"' in command
+    assert "agents.enabled=false" in command
+    assert "model_context_window=16384" in command
+    assert command[-1] == "prompt"
+
+
+def test_engine_command_rejects_bad_context_window(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("MAXCODE_MODEL_CONTEXT_WINDOW", "wide")
+    with pytest.raises(EngineError, match="not an integer"):
+        _build_command("engine", Path("/tmp/repo"), make_provider(), "m", "prompt")
 
 
 def test_engine_parses_fake_engine(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:

@@ -1,0 +1,4 @@
+WARNING: proceeding, even though we could not create PATH aliases: Refusing to create helper binaries under temporary dir "/tmp" (codex_home: AbsolutePathBuf("/tmp/maxcode-live/raw-stock-codex-hello/home"))
+Reading additional input from stdin...
+2026-10-31T14:24:09.097276Z ERROR codex_core::tools::router: error=write_stdin failed: Unknown process id 1
+2026-10-31T14:24:09.468213Z ERROR codex_core::tools::router: error=unable to locate image at `/tmp/maxcode-live/raw-stock-codex-hello/repo/hello.txt`: No such file or directory (os error 2)

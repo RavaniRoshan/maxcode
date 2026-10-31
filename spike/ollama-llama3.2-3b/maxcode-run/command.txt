@@ -1,0 +1,20 @@
+Date: 2026-10-31
+Planner: Pollinations AI (anonymous) gpt-oss-20b at https://text.pollinations.ai/openai
+Worker: local Ollama 0.31.1 llama3.2:3b at http://127.0.0.1:11434/v1
+Verifier: `python -m pytest -q`
+
+Environment (names only; placeholder values, not credentials):
+  POLLINATIONS_KEY=anonymous
+  OLLAMA_API_KEY=local
+  MAXCODE_ENGINE_BIN=/home/shiva/projects/maxcode-engine/maxcode-rs/target/dev-small/maxcode-engine
+  MAXCODE_REASONING_EFFORT=none
+  MAXCODE_MODEL_CONTEXT_WINDOW=16384
+  MAXCODE_HOME=/tmp/maxcode-live/demo/engine-home-llama2
+
+Command (run in the demo repository, which starts with a failing add()):
+  maxcode run --yes --config maxcode-live3.toml \
+    "Edit app.py so add(a, b) returns a + b. Use the exec_command tool to run sed -i 's/return a - b/return a + b/' app.py. Then run python -m pytest -q to confirm. Do not change tests."
+
+Result: exit 0, steps 1/1, check test passed, app.py changed to `return a + b`,
+run_end.passed = true, 7182 input / 1067 output tokens, cost 0.0000 (partial).
+See stdout.txt, run.jsonl, engine-session-*.jsonl, app.py.after.

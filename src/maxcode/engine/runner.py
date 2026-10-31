@@ -5,6 +5,7 @@
 import contextlib
 import json
 import os
+import re
 import shutil
 import subprocess
 import time
@@ -15,6 +16,25 @@ from maxcode.config import ProviderConfig
 from maxcode.errors import EngineError
 from maxcode.schemas import EngineResult
 
+MIN_CODEX_VERSION = (0, 165)
+
+
+def _engine_version(binary: str) -> tuple[int, int, int] | None:
+    """Read a three-part version from '<binary> --version'."""
+    try:
+        result = subprocess.run(
+            [binary, "--version"],
+            capture_output=True,
+            text=True,
+            timeout=10,
+        )
+    except (OSError, subprocess.TimeoutExpired):
+        return None
+    match = re.search(r"(\d+)\.(\d+)\.(\d+)", result.stdout + result.stderr)
+    if match is None:
+        return None
+    return (int(match.group(1)), int(match.group(2)), int(match.group(3)))
+
 
 def _binary() -> str:
     override = os.environ.get("MAXCODE_ENGINE_BIN")
@@ -23,18 +43,49 @@ def _binary() -> str:
     found = shutil.which("maxcode-engine")
     if found:
         return found
+    stock = shutil.which("codex")
+    if stock:
+        version = _engine_version(stock)
+        if version is not None and version >= MIN_CODEX_VERSION:
+            return stock
+        shown = ".".join(str(part) for part in version) if version else "unknown"
+        raise EngineError(
+            "The Codex CLI on PATH is too old.",
+            f"Found '{stock}' reporting version {shown}; maxcode needs 0.165 or newer.",
+            "Install Codex 0.165 or newer, or set MAXCODE_ENGINE_BIN to a compatible binary.",
+        )
     raise EngineError(
-        "The maxcode engine binary was not found.",
-        "maxcode looks for 'maxcode-engine' on PATH, or uses MAXCODE_ENGINE_BIN.",
-        "Build the engine or set MAXCODE_ENGINE_BIN to the binary path.",
+        "No engine binary was found.",
+        "maxcode looks for MAXCODE_ENGINE_BIN, 'maxcode-engine' on PATH, then 'codex' 0.165+.",
+        "Build maxcode-engine, install Codex 0.165+, or set MAXCODE_ENGINE_BIN.",
     )
+
+
+def _context_override(value: str) -> str | None:
+    """Turn MAXCODE_MODEL_CONTEXT_WINDOW into a Codex override."""
+    if not value.strip():
+        return None
+    try:
+        window = int(value)
+    except ValueError as exc:
+        raise EngineError(
+            "MAXCODE_MODEL_CONTEXT_WINDOW is not an integer.",
+            f"The value {value!r} cannot be parsed as a whole number.",
+            "Set it to a positive integer, or unset it.",
+        ) from exc
+    if window <= 0:
+        raise EngineError(
+            "MAXCODE_MODEL_CONTEXT_WINDOW must be positive.",
+            f"The value {window} is not a positive number of tokens.",
+            "Set it to a positive integer, or unset it.",
+        )
+    return f"model_context_window={window}"
 
 
 def _build_command(
     binary: str, repo: Path, provider: ProviderConfig, model: str, prompt: str
 ) -> list[str]:
-    import json as _json
-
+    reasoning = os.environ.get("MAXCODE_REASONING_EFFORT", "low")
     command = [
         binary,
         "exec",
@@ -51,15 +102,22 @@ def _build_command(
         "-c",
         'model_providers.maxcode.name="maxcode"',
         "-c",
-        f"model_providers.maxcode.base_url={_json.dumps(provider.base_url)}",
+        f"model_providers.maxcode.base_url={json.dumps(provider.base_url)}",
         "-c",
-        f"model_providers.maxcode.env_key={_json.dumps(provider.api_key_env)}",
+        f"model_providers.maxcode.env_key={json.dumps(provider.api_key_env)}",
         "-c",
         'model_providers.maxcode.wire_api="responses"',
         "-c",
-        'model_reasoning_effort="minimal"',
-        prompt,
+        f"model_reasoning_effort={json.dumps(reasoning)}",
+        "-c",
+        'web_search="disabled"',
+        "-c",
+        "agents.enabled=false",
     ]
+    context = _context_override(os.environ.get("MAXCODE_MODEL_CONTEXT_WINDOW", ""))
+    if context is not None:
+        command.extend(["-c", context])
+    command.append(prompt)
     return command
 
 

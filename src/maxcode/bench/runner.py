@@ -2,11 +2,13 @@
 # SPDX-License-Identifier: Apache-2.0
 """Run the benchmark suite and write results.csv plus per-task logs."""
 
+import contextlib
 import csv
 import json
+import os
 import shutil
 import subprocess
-from collections.abc import Callable
+from collections.abc import Callable, Iterator
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -44,6 +46,24 @@ class TaskResult:
     unverified: int = 0
     log_path: str = ""
     error: str = ""
+
+
+@contextlib.contextmanager
+def _repo_pythonpath(repo: Path) -> Iterator[None]:
+    """Put a src-layout repository on PYTHONPATH for checks and scoring."""
+    src = repo / "src"
+    if not src.is_dir():
+        yield
+        return
+    previous = os.environ.get("PYTHONPATH")
+    os.environ["PYTHONPATH"] = str(src) if not previous else f"{src}{os.pathsep}{previous}"
+    try:
+        yield
+    finally:
+        if previous is None:
+            os.environ.pop("PYTHONPATH", None)
+        else:
+            os.environ["PYTHONPATH"] = previous
 
 
 def _load_tasks(suite: Path) -> list[dict[str, Any]]:
@@ -136,30 +156,29 @@ def run_bench(
             task_result.error = f"clone failed: {exc}"
             results.append(task_result)
             continue
-        try:
-            run_result = run_task_fn(
-                task.get("task", ""),
-                cfg,
-                RunOptions(yes=True, verifier=verifier),
-                repo=repo,
-            )
-            task_result.run_passed = bool(run_result.passed)
-            task_result.cost_usd = float(run_result.cost_usd)
-            task_result.tokens_in = int(run_result.tokens_in)
-            task_result.tokens_out = int(run_result.tokens_out)
-            task_result.unverified = len(run_result.unverified_steps)
-            task_result.log_path = str(run_result.log_path)
-            if run_result.log_path and Path(run_result.log_path).is_file():
-                shutil.copyfile(
-                    run_result.log_path, task_dir / "run.jsonl"
+        with _repo_pythonpath(repo):
+            try:
+                run_result = run_task_fn(
+                    task.get("task", ""),
+                    cfg,
+                    RunOptions(yes=True, verifier=verifier),
+                    repo=repo,
                 )
-                task_result.log_path = str(task_dir / "run.jsonl")
-        except Exception as exc:  # noqa: BLE001
-            task_result.error = f"run failed: {exc}"
-        score_command = task.get("score") or task.get("score_command") or ""
-        passed, code, _ = _run_score(score_command, repo)
-        task_result.score_passed = passed
-        task_result.score_exit_code = code
+                task_result.run_passed = bool(run_result.passed)
+                task_result.cost_usd = float(run_result.cost_usd)
+                task_result.tokens_in = int(run_result.tokens_in)
+                task_result.tokens_out = int(run_result.tokens_out)
+                task_result.unverified = len(run_result.unverified_steps)
+                task_result.log_path = str(run_result.log_path)
+                if run_result.log_path and Path(run_result.log_path).is_file():
+                    shutil.copyfile(run_result.log_path, task_dir / "run.jsonl")
+                    task_result.log_path = str(task_dir / "run.jsonl")
+            except Exception as exc:  # noqa: BLE001
+                task_result.error = f"run failed: {exc}"
+            score_command = task.get("score") or task.get("score_command") or ""
+            passed, code, _ = _run_score(score_command, repo)
+            task_result.score_passed = passed
+            task_result.score_exit_code = code
         results.append(task_result)
 
     csv_path = out_dir / "results.csv"
