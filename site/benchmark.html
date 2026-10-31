@@ -89,7 +89,7 @@
       <div class="wrap">
         <p class="label">results</p>
         <h2>Published runs</h2>
-        <p class="prose">No run has been published yet. The table is intentionally empty rather than filled with an estimate. A published row must link to the log that produced it.</p>
+        <p class="prose">The 2026-10-31 run used three pinned projects (click, itsdangerous, markupsafe), planner <code>qwen2.5-coder:1.5b</code>, and worker <code>qwen3:1.7b</code>. Both arms scored 3/3, so the absolute gain was 0 percentage points. The verifier-on arm hit the 300-second worker timeout before verification; the repositories were unchanged, so the score still passed. Read the method, failures, and exclusions in <a href="https://github.com/RavaniRoshan/maxcode/blob/main/docs/BENCH.md">docs/BENCH.md</a>.</p>
         <div class="table-wrap mt-32">
           <table>
             <thead>
@@ -97,24 +97,25 @@
             </thead>
             <tbody>
               <tr>
-                <td>maxcode v0.1</td>
-                <td class="muted">not published</td>
+                <td>2026-10-31, N=3</td>
+                <td><code>qwen3:1.7b</code></td>
                 <td>on</td>
-                <td class="num"><span class="chip chip-unverified">pending</span></td>
-                <td class="num muted">pending</td>
-                <td class="num muted">pending</td>
+                <td class="num">3/3 (100%)</td>
+                <td class="num">$0.0000</td>
+                <td><a href="https://github.com/RavaniRoshan/maxcode/tree/main/docs/bench/2026-10-31/verifier-on">raw log</a></td>
               </tr>
               <tr>
-                <td>maxcode v0.1</td>
-                <td class="muted">not published</td>
+                <td>2026-10-31, N=3</td>
+                <td><code>qwen3:1.7b</code></td>
                 <td>off</td>
-                <td class="num"><span class="chip chip-unverified">pending</span></td>
-                <td class="num muted">pending</td>
-                <td class="num muted">pending</td>
+                <td class="num">3/3 (100%)</td>
+                <td class="num">$0.0000</td>
+                <td><a href="https://github.com/RavaniRoshan/maxcode/tree/main/docs/bench/2026-10-31/verifier-off">raw log</a></td>
               </tr>
             </tbody>
           </table>
         </div>
+        <p class="small muted mt-24">The <code>psf/requests</code> tasks were excluded: four tests in its pinned score command already fail on a clean checkout in this environment. They are not counted as passes.</p>
       </div>
     </section>
 

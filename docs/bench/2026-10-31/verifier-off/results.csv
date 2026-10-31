@@ -1,0 +1,4 @@
+task,repo_url,commit,verifier,run_passed,score_passed,score_exit_code,cost_usd,tokens_in,tokens_out,unverified,log,error
+task-001,https://github.com/pallets/click.git,2247b35ea1c47c727d7a06e51fa280e12a863ff6,off,True,True,0,0.000000,30328,1087,0,/tmp/maxcode-bench/root/.maxcode/bench/20261031T144456-6d3736/task-001/run.jsonl,
+task-002,https://github.com/pallets/itsdangerous.git,672971d66a2ef9f85151e53283113f33d642dabd,off,True,True,0,0.000000,63604,1796,0,/tmp/maxcode-bench/root/.maxcode/bench/20261031T144456-6d3736/task-002/run.jsonl,
+task-003,https://github.com/pallets/markupsafe.git,4e111271b1494995708a9e878a10829b5e10c7ba,off,True,True,0,0.000000,31388,1035,0,/tmp/maxcode-bench/root/.maxcode/bench/20261031T144456-6d3736/task-003/run.jsonl,

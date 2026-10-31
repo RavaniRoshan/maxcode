@@ -1,0 +1,2 @@
+tasks: 3/3  cost: $0.0000
+on exit=0

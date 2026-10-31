@@ -2,12 +2,25 @@
 
 ## Unreleased
 
+### Added
+
+- Live evidence on local open-weight models: `qwen3:1.7b` and `llama3.2:3b`
+  completed multi-turn tool-calling tasks and full `maxcode run` loops with the
+  verifier on. Logs and commands are in `spike/`; the analysis is in `SPIKE.md`.
+- The engine adapter falls back to stock `codex` 0.165+ on `PATH`.
+- `MAXCODE_REASONING_EFFORT` and `MAXCODE_MODEL_CONTEXT_WINDOW` environment
+  overrides for providers with different reasoning or context settings.
+- The benchmark runner puts a repository's `src/` on `PYTHONPATH`, so pinned
+  src-layout projects can run their own tests and score commands.
+
 ### Changed
 
 - The engine is now a full rebrand: `maxcode-engine`, `maxcode-*` crates,
   `MAXCODE_HOME`, and maxcode help/TUI strings.
-- The Python adapter finds only `maxcode-engine`; set `MAXCODE_ENGINE_BIN` or
-  put the binary on `PATH`. No fallback binary is used.
+- Disabled web search and multi-agent tools in the worker command; Ollama 0.31.1
+  loses function names when those tool types are present.
+- The README, SPIKE, and site now distinguish live-verified, mock-verified, and
+  unverified claims.
 - README, site, and mascot assets were rebuilt around Max and the verifier loop.
 - The site is three pages (Home, Docs, Benchmark); GitHub is an external link.
 
@@ -31,6 +44,8 @@
 
 ### Notes
 
-- T0 live runs on `qwen/qwen3-coder-next` and `deepseek/deepseek-v3.2` are recorded
-  in `SPIKE.md` once an API key is available.
+- The original OpenRouter models (`qwen/qwen3-coder-next`,
+  `deepseek/deepseek-v3.2`) remain unverified because no funded credential is
+  available. The 2026-10-31 live runs use local Ollama models and are recorded in
+  `SPIKE.md`.
 - Publish to PyPI with `uv publish` after the trademark and legal review.

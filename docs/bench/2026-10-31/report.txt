@@ -1,0 +1,4 @@
+| verifier | tasks | pass rate | cost per completed task | unverified |
+|---|---:|---:|---:|---:|
+| off | 3 | 100.0% | $0.0000 | 0 |
+| on | 3 | 100.0% | $0.0000 | 0 |

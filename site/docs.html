@@ -55,24 +55,31 @@ cargo build --release -p maxcode-cli --bin maxcode-engine
 install -m 755 target/release/maxcode-engine ~/.local/bin/maxcode-engine</code></pre>
           <button class="copy" data-copy="#doc-engine" type="button" aria-label="Copy engine build commands">copy</button>
         </div>
-        <p class="mt-24">The engine is found on <code>PATH</code> as <code>maxcode-engine</code>, or set <code>MAXCODE_ENGINE_BIN</code> to an absolute path. There is no fallback binary.</p>
+        <p class="mt-24">The adapter tries <code>MAXCODE_ENGINE_BIN</code>, then <code>maxcode-engine</code> on <code>PATH</code>, then stock <code>codex</code> 0.165 or newer on <code>PATH</code>. Stock Codex is the faster install; build the fork only if you want the rebranded binary or a future patch.</p>
       </div>
 
       <div class="doc-section" id="config">
         <h2>Config</h2>
         <p>Create <code>maxcode.toml</code> in the project root. The key is read from the environment named by <code>api_key_env</code>; it is never written to disk.</p>
         <div class="code-block">
-          <pre><code id="doc-config">[provider.main]
-base_url    = "https://openrouter.ai/api/v1"
-api_key_env = "OPENROUTER_API_KEY"
+          <pre><code id="doc-config">[provider.pollinations]
+base_url    = "https://text.pollinations.ai/openai"
+api_key_env = "POLLINATIONS_KEY"
+
+[provider.local]
+base_url    = "http://127.0.0.1:11434/v1"
+api_key_env = "OLLAMA_API_KEY"
 
 [planner]
-provider = "main"
-model    = "qwen/qwen3-coder-next"
+provider = "pollinations"
+model    = "openai"
 
 [worker]
-provider = "main"
-model    = "deepseek/deepseek-v3.2"
+provider = "local"
+model    = "llama3.2:3b"
+
+[checks]
+test = "python -m pytest -q"
 
 [limits]
 max_retries_per_step  = 3
@@ -81,7 +88,7 @@ max_diff_lines        = 400
 max_steps             = 12</code></pre>
           <button class="copy" data-copy="#doc-config" type="button" aria-label="Copy example config">copy</button>
         </div>
-        <p class="mt-24">Any OpenAI-compatible chat endpoint works. Free model slugs change often; if one is unavailable, use a model your account can access.</p>
+        <p class="mt-24">Any OpenAI-compatible Responses endpoint works; Codex 0.165 removed Chat Completions support. The example above is the configuration used for the live logs in <code>spike/</code>.</p>
       </div>
 
       <div class="doc-section" id="commands">

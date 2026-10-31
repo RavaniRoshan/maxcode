@@ -15,7 +15,7 @@
   <a href="https://github.com/RavaniRoshan/maxcode/actions/workflows/ci.yml"><img src="https://github.com/RavaniRoshan/maxcode/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache--2.0-D9DEE5.svg" alt="Apache-2.0"></a>
   <img src="https://img.shields.io/badge/python-3.12%2B-0A0F1E.svg" alt="Python 3.12+">
-  <img src="https://img.shields.io/badge/status-v0.1-8D99AB.svg" alt="v0.1">
+  <img src="https://img.shields.io/badge/status-v0.1.0--alpha.1-8D99AB.svg" alt="v0.1.0-alpha.1">
 </p>
 
 ---
@@ -29,27 +29,38 @@ maxcode separates **doing the work** from **declaring it finished**. A planner
 splits the task into steps. A worker edits one step at a time. A verifier runs
 the repository's own checks. Only a clean verifier run closes the step.
 
-```text
-$ maxcode run "fix add so the tests pass"
+Real output from a local Ollama run
+([`spike/ollama-qwen3-1.7b/maxcode-run/`](spike/ollama-qwen3-1.7b/maxcode-run/)):
 
-  plan   3 steps
-  step   1/3  read app.py and tests/test_app.py          pass
-  step   2/3  fix add() to return a + b                  pass
-  check  pytest -q                                       pass  6 passed
-  check  ruff check .                                    pass
-  done   all checks passed                               0 failures
+```text
+$ maxcode run --yes "Edit app.py so add(a, b) returns a + b. Use the exec_command
+tool to run sed -i 's/return a - b/return a + b/' app.py. Then run python -m pytest -q
+to confirm. Do not change tests."
+
+steps: 1/1  cost: $0.0000  tokens: 7152 in / 1264 out
+cost is partial: some calls lacked a price or a token count
 ```
 
-## Why it is different
+The run log records `test: passed` with `1 passed in 0.01s`, and
+`run_end.passed` is `true`. The demo repository has one test, not six. The same
+loop also passed with `llama3.2:3b`
+([`spike/ollama-llama3.2-3b/`](spike/ollama-llama3.2-3b/)).
 
-| | Typical agent | maxcode |
-|---|---|---|
-| **Definition of done** | The model stops | The verifier passes |
-| **Failure handling** | Retry the prompt | Retry from a git checkpoint |
-| **Evidence** | Chat transcript | JSONL run log with tokens and cost |
-| **Undo** | Manual | `maxcode undo` |
-| **Model choice** | Vendor-locked | Any OpenAI-compatible endpoint |
-| **Secrets** | Often stored | Environment variables only |
+## What maxcode guarantees
+
+| Question | maxcode's answer |
+|---|---|
+| **When is a step done?** | Only when every configured or detected check exits 0. |
+| **What happens on failure?** | The step retries from its git checkpoint, up to the limit, then stops. |
+| **What is the evidence?** | A JSONL run log with check exit codes, token usage, and cost. |
+| **Can I undo?** | `maxcode undo` restores the last checkpoint. |
+| **Which model?** | Any OpenAI-compatible Responses endpoint. |
+| **Where is the key?** | Environment variables only. |
+
+These are guarantees about what maxcode does, not claims about other tools. As
+of the 2026-10-29 GitHub search recorded in [`SPIKE.md`](SPIKE.md), **no widely
+used open coding CLI makes an independent pass/fail gate its core product**.
+Similar ideas exist as add-ons and internal retry loops.
 
 The verifier is not another model opinion. It is the command your project already
 trusts: `pytest`, `npm test`, `cargo test`, `go test`, `ruff`, `mypy`, or a
@@ -76,7 +87,26 @@ uv run maxcode --help
 
 ### 2. The engine
 
-maxcode calls a separate engine process for each step. Build the engine once:
+maxcode calls a separate engine process for each step. **Stock Codex 0.165 or
+newer is the one-minute path:**
+
+```bash
+npm install -g @openai/codex@0.165.0
+codex --version
+```
+
+The adapter looks for an engine in this order:
+
+1. `MAXCODE_ENGINE_BIN`, when set.
+2. `maxcode-engine` on `PATH`.
+3. `codex` on `PATH`, when its version is 0.165.0 or newer.
+
+Stock Codex and `maxcode-engine` produced the same event types on the same live
+task; the comparison is in [`SPIKE.md`](SPIKE.md) and
+[`spike/engine-comparison/`](spike/engine-comparison/).
+
+The fork is optional. It is useful only if you want the rebranded binary or a
+future engine patch:
 
 ```bash
 git clone https://github.com/RavaniRoshan/maxcode-engine.git
@@ -92,39 +122,39 @@ cargo build --profile dev-small -p maxcode-cli --bin maxcode-engine
 install -m 755 target/dev-small/maxcode-engine ~/.local/bin/maxcode-engine
 ```
 
-Verify both pieces:
-
-```bash
-maxcode-engine --version
-maxcode version
-```
-
-If the engine lives somewhere else, point to it explicitly:
+If the binary lives somewhere else:
 
 ```bash
 export MAXCODE_ENGINE_BIN="$HOME/.local/bin/maxcode-engine"
 ```
 
-No fallback binary, no hidden download, no key baked into the binary.
+No hidden download, and no key baked into the binary.
 
 ## Configure
 
-Create `maxcode.toml` in your project. The provider can be OpenRouter,
-Together, Groq, Fireworks, a local server, or anything that speaks the
-OpenAI-compatible API.
+Create `maxcode.toml` in your project. The provider can be OpenRouter, Together,
+Groq, Fireworks, a local server, or anything that speaks the OpenAI-compatible
+Responses API. Codex 0.165 removed Chat Completions support, so the engine side
+must expose `/v1/responses`.
+
+This is the configuration that produced the live logs in `spike/`:
 
 ```toml
-[provider.main]
-base_url    = "https://openrouter.ai/api/v1"
-api_key_env = "OPENROUTER_API_KEY"
+[provider.pollinations]
+base_url    = "https://text.pollinations.ai/openai"
+api_key_env = "POLLINATIONS_KEY"
+
+[provider.local]
+base_url    = "http://127.0.0.1:11434/v1"
+api_key_env = "OLLAMA_API_KEY"
 
 [planner]
-provider = "main"
-model    = "qwen/qwen3-coder-next"
+provider = "pollinations"
+model    = "openai"          # the service's alias for gpt-oss-20b
 
 [worker]
-provider = "main"
-model    = "deepseek/deepseek-v3.2"
+provider = "local"
+model    = "llama3.2:3b"
 
 [limits]
 max_retries_per_step  = 3
@@ -134,14 +164,25 @@ max_steps             = 12
 ```
 
 ```bash
-export OPENROUTER_API_KEY="..."
+ollama pull llama3.2:3b
+export POLLINATIONS_KEY=anonymous   # the anonymous tier needs a non-empty value
+export OLLAMA_API_KEY=local         # Ollama ignores the value
 ```
 
-maxcode reads the key from the environment at run time. It never writes the key
-to a config file, a log, or a checkpoint. Free model availability changes; if a
-`:free` slug is unavailable, use a model your account can access.
+maxcode reads each key from the environment at run time. It never writes the key
+to a config file, a log, or a checkpoint. The OpenRouter example is not shown
+because no funded OpenRouter credential was available for a live log; the same
+`[provider.<id>]` shape is used for it, but it was not live-verified here.
 
-## Five-minute demo
+The planner must return the JSON plan. A 1.5B planner
+(`qwen2.5-coder:1.5b`) returned plans that invented unavailable linters in the
+benchmark; choose a planner that can follow the schema. The worker can be a
+smaller model: both `qwen3:1.7b` and `llama3.2:3b` produced live edits.
+
+## Demo
+
+The commands below are the ones that produced the live logs. The model pull is
+the slow part; after it finishes, the run takes about a minute.
 
 ```bash
 mkdir demo && cd demo
@@ -161,20 +202,30 @@ def test_add():
 PY
 
 cat > maxcode.toml <<'TOML'
-[provider.main]
-base_url    = "https://openrouter.ai/api/v1"
-api_key_env = "OPENROUTER_API_KEY"
+[provider.pollinations]
+base_url    = "https://text.pollinations.ai/openai"
+api_key_env = "POLLINATIONS_KEY"
+
+[provider.local]
+base_url    = "http://127.0.0.1:11434/v1"
+api_key_env = "OLLAMA_API_KEY"
 
 [planner]
-provider = "main"
-model    = "qwen/qwen3-coder-next"
+provider = "pollinations"
+model    = "openai"
 
 [worker]
-provider = "main"
-model    = "deepseek/deepseek-v3.2"
+provider = "local"
+model    = "llama3.2:3b"
+
+[checks]
+test = "python -m pytest -q"
 TOML
 
-maxcode run "fix add so the test passes"
+ollama pull llama3.2:3b
+export POLLINATIONS_KEY=anonymous OLLAMA_API_KEY=local
+
+maxcode run --yes "Edit app.py so add(a, b) returns a + b. Use the exec_command tool to run sed -i 's/return a - b/return a + b/' app.py. Then run python -m pytest -q to confirm. Do not change tests."
 ```
 
 Exit code `0` means the verifier passed. Anything else means the work is not
@@ -227,10 +278,10 @@ Useful flags: `run --yes`, `run --config PATH`, `run --max-cost USD`,
 
 maxcode detects the project type and runs the checks it finds:
 
-- **Python** — pytest, ruff, mypy
-- **Node** — the package manager's test, lint, and build scripts
-- **Rust** — cargo test, cargo clippy
-- **Go** — go test ./...
+- **Python** — pytest; ruff when the project configures it; compileall for `src/`
+- **Node** — the package manager's test, lint, and build scripts, when present
+- **Rust** — cargo test, cargo build, cargo clippy
+- **Go** — go test ./..., go build ./..., go vet ./...
 
 You can add or override checks in `maxcode.toml`. Checks run with a timeout and
 their full output is kept in the run log, so a failure is reproducible.
@@ -238,9 +289,25 @@ their full output is kept in the run log, so a failure is reproducible.
 ## Benchmark
 
 The repository ships a benchmark harness, not a leaderboard. It runs the same
-task suite twice: once with the verifier on, once with it off. The default suite
-is four pinned Python projects repeated five times each, so it measures
-consistency rather than breadth. Results and raw logs land in `.maxcode/bench/`.
+task suite twice: once with the verifier on, once with it off. Results and raw
+logs are published in [`docs/BENCH.md`](docs/BENCH.md) and
+[`docs/bench/2026-10-31/`](docs/bench/2026-10-31/).
+
+The 2026-10-31 run used a 3-task subset of the default suite (one task each from
+`pallets/click`, `pallets/itsdangerous`, `pallets/markupsafe`), planner
+`qwen2.5-coder:1.5b`, and worker `qwen3:1.7b`, both through Ollama 0.31.1:
+
+| Verifier | Score pass rate | Run passed | Tokens in / out |
+|---|---:|---:|---:|
+| on | 3/3 (100%) | 0/3 | 5,613 / 580 |
+| off | 3/3 (100%) | 3/3 | 125,320 / 3,918 |
+
+**The absolute gain is 0 percentage points.** The verifier-on arm hit the
+300-second worker timeout before verification, and the repositories were
+unchanged, so the final score still passed. This is a ceiling effect, not
+evidence of an advantage. `psf/requests` is excluded because its pinned commit
+already fails 4 tests on a clean checkout. Read
+[`docs/BENCH.md`](docs/BENCH.md) for every failure.
 
 ```bash
 maxcode bench --verifier on
@@ -248,9 +315,9 @@ maxcode bench --verifier off
 uv run python -m maxcode.bench.report .maxcode/bench
 ```
 
-The report prints pass rate, cost per completed task, and the unverified count.
-Numbers depend on the model, provider, and repository; this README does not
-publish a score without the matching log.
+The default suite is four pinned Python projects repeated five times each. A
+published score must link to its raw log; this README does not publish one
+without it.
 
 ## Architecture
 
@@ -260,7 +327,7 @@ src/maxcode/
   config.py         maxcode.toml, providers, limits
   loop.py           plan -> work -> verify -> checkpoint
   roles/            planner, worker, verifier roles
-  engine/           adapter for the maxcode-engine process
+  engine/           adapter for stock Codex or maxcode-engine
   providers/        OpenAI-compatible chat client
   bench/            task suite, runner, report
 ```
@@ -284,9 +351,29 @@ engine has its own build notes in
 
 ## Status
 
-v0.1. The planner/worker/verifier loop, checkpoints, cost reporting, benchmark
-harness, and static site are implemented. Live provider runs require your own
-API key. The project is deliberately small enough to audit.
+v0.1.0-alpha.1.
+
+**Live-verified** (logs in [`spike/`](spike/)):
+
+- planner -> worker -> verifier loop on Ollama `qwen3:1.7b` and `llama3.2:3b`;
+- multi-turn tool calls, file edits that land on disk, and `turn.completed` usage;
+- the verifier gate (`1 passed in 0.01s`) and `run_end.passed = true`;
+- stock Codex 0.165 and `maxcode-engine` produce the same event types on the
+  same task.
+
+**Mock/offline-verified:**
+
+- the full CLI state machine and 115 offline tests;
+- OpenRouter, Hugging Face, and DeepSeek wire shapes, without a funded credential.
+
+**Not verified:**
+
+- live runs on the original OpenRouter models `qwen/qwen3-coder-next` and
+  `deepseek/deepseek-v3.2`; no funded credential exists in this environment;
+- a benchmark gain above 10 points. See [`docs/BENCH.md`](docs/BENCH.md).
+
+The badge stays alpha until a funded-provider run and a wider benchmark exist.
+The project is deliberately small enough to audit.
 
 ## Legal
 
