@@ -33,7 +33,7 @@ marks are local SVGs/images.
   `DESIGN.md`.
 - Home title, description, and `og:title` match DESIGN.md section 10 exactly.
   `og:image` uses the canonical deployment path.
-- No occurrence of “powered by maxm1” remains in the canonical site.
+- No model-brand claim remains in the canonical site.
 - The only animations are `blink`, `bob`, `pulse`, and the cursor blink. All
   stop under `prefers-reduced-motion`.
 
