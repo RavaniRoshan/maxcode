@@ -29,22 +29,22 @@ maxcode separates **doing the work** from **declaring it finished**. A planner
 splits the task into steps. A worker edits one step at a time. A verifier runs
 the repository's own checks. Only a clean verifier run closes the step.
 
-Real output from a local Ollama run
-([`spike/ollama-qwen3-1.7b/maxcode-run/`](spike/ollama-qwen3-1.7b/maxcode-run/)):
+Real output from a local Ollama run with the configuration below
+([`spike/ollama-llama3.2-3b/maxcode-run/`](spike/ollama-llama3.2-3b/maxcode-run/)):
 
 ```text
 $ maxcode run --yes "Edit app.py so add(a, b) returns a + b. Use the exec_command
 tool to run sed -i 's/return a - b/return a + b/' app.py. Then run python -m pytest -q
 to confirm. Do not change tests."
 
-steps: 1/1  cost: $0.0000  tokens: 7152 in / 1264 out
+steps: 1/1  cost: $0.0000  tokens: 7182 in / 1067 out
 cost is partial: some calls lacked a price or a token count
 ```
 
-The run log records `test: passed` with `1 passed in 0.01s`, and
-`run_end.passed` is `true`. The demo repository has one test, not six. The same
-loop also passed with `llama3.2:3b`
-([`spike/ollama-llama3.2-3b/`](spike/ollama-llama3.2-3b/)).
+The run log records `test: passed` and `run_end.passed = true`. The demo
+repository has one test, not six. The same loop also passed with
+`qwen3:1.7b` (7152 input / 1264 output tokens,
+[`spike/ollama-qwen3-1.7b/`](spike/ollama-qwen3-1.7b/)).
 
 ## What maxcode guarantees
 
