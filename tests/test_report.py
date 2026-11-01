@@ -28,3 +28,28 @@ def test_summarize_prints_table(tmp_path: Path) -> None:
     assert "on" in table
     assert "off" in table
     assert "50.0%" in table or "100.0%" in table
+
+
+def test_summarize_lists_invalid_tasks(tmp_path: Path) -> None:
+    out = tmp_path / "run"
+    out.mkdir()
+    with (out / "results.csv").open("w", newline="", encoding="utf-8") as handle:
+        writer = csv.writer(handle)
+        writer.writerow(
+            [
+                "task",
+                "verifier",
+                "score_passed",
+                "status",
+                "excluded_reason",
+                "cost_usd",
+                "unverified",
+            ]
+        )
+        writer.writerow(["invalid-task", "on", "True", "invalid", "baseline passed", "0.0", "0"])
+        writer.writerow(["valid-task", "on", "True", "pass", "", "0.1", "0"])
+    table = summarize([out])
+    assert "| on | 1 | 100.0%" in table
+    assert "Excluded from N" in table
+    assert "invalid-task" in table
+    assert "baseline passed" in table

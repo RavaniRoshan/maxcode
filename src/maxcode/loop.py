@@ -167,6 +167,7 @@ def run_task(
                 repo=root,
                 engine=engine if engine is not None else real_run_step,
                 meter=meter,
+                timeout_s=cfg.limits.worker_timeout_s,
             )
 
         def checkpoint_create(run: str, step_id: int) -> str:

@@ -13,16 +13,25 @@ def summarize(results_dirs: list[Path]) -> str:
     groups: dict[str, dict[str, float]] = defaultdict(
         lambda: {"tasks": 0, "passed": 0, "cost": 0.0, "unverified": 0}
     )
+    invalid: list[tuple[str, str]] = []
     for directory in results_dirs:
         csv_path = directory / "results.csv"
         if not csv_path.is_file():
             continue
         with csv_path.open(newline="", encoding="utf-8") as handle:
             for row in csv.DictReader(handle):
+                status = row.get("status", "")
+                if status == "invalid":
+                    reason = row.get("excluded_reason") or "baseline passed"
+                    invalid.append((row.get("task", ""), reason))
+                    continue
                 verifier = row.get("verifier", "on")
                 group = groups[verifier]
                 group["tasks"] += 1
-                if row.get("score_passed") == "True":
+                if status:
+                    if status == "pass":
+                        group["passed"] += 1
+                elif row.get("score_passed") == "True":
                     group["passed"] += 1
                 group["cost"] += float(row.get("cost_usd") or 0.0)
                 group["unverified"] += int(row.get("unverified") or 0)
@@ -42,6 +51,11 @@ def summarize(results_dirs: list[Path]) -> str:
         )
     if len(lines) == 2:
         lines.append("| (no data) | 0 | 0.0% | $0.0000 | 0 |")
+    if invalid:
+        lines.append("")
+        lines.append("Excluded from N (baseline passed):")
+        for task, reason in invalid:
+            lines.append(f"- {task}: {reason}")
     return "\n".join(lines)
 
 

@@ -76,3 +76,14 @@ def test_do_step_calls_engine_and_reports_usage(tmp_path: Path) -> None:
         assert mock_run.called
         assert meter.tokens_in == 4
         assert meter.tokens_out == 2
+
+
+def test_do_step_forwards_timeout(tmp_path: Path) -> None:
+    from unittest.mock import patch
+
+    from maxcode.schemas import EngineResult
+
+    fake_result = EngineResult(exit_code=0, transcript="done")
+    with patch("maxcode.roles.worker.run_step", return_value=fake_result) as mock_run:
+        do_step(STEP, None, CFG, task="task", repo=tmp_path, timeout_s=42.0)
+    assert mock_run.call_args.args[4] == 42.0

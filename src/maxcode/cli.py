@@ -251,7 +251,11 @@ def bench(
     except MaxcodeError as error:
         _print_error(error)
         raise typer.Exit(code=_exit_code_for(error)) from error
-    typer.echo(f"tasks: {summary.passed}/{summary.total}  cost: ${summary.cost_usd:.4f}")
+    typer.echo(
+        f"tasks: {summary.passed}/{summary.total}  "
+        f"invalid: {summary.invalid}  errors: {summary.errors}  "
+        f"cost: ${summary.cost_usd:.4f}"
+    )
 
 
 @app.command()

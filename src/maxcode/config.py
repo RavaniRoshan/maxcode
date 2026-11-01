@@ -51,6 +51,7 @@ class Limits(StrictModel):
     max_cost_usd_per_task: float = Field(default=2.0, gt=0)
     max_diff_lines: int = Field(default=400, ge=1)
     max_steps: int = Field(default=12, ge=1)
+    worker_timeout_s: float = Field(default=600.0, gt=0)
 
 
 class ChecksConfig(StrictModel):

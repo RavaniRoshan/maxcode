@@ -134,3 +134,18 @@ def test_api_key_for_reports_missing_key(monkeypatch: pytest.MonkeyPatch) -> Non
     )
     with pytest.raises(ConfigError):
         cfg.api_key_for("main")
+
+
+def test_worker_timeout_defaults_to_600(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setenv("MAXCODE_TEST_KEY", "secret-value")
+    cfg = load_config(write_config(tmp_path))
+    assert cfg.limits.worker_timeout_s == 600.0
+
+
+def test_worker_timeout_override(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("MAXCODE_TEST_KEY", "secret-value")
+    text = VALID_CONFIG.replace("max_steps = 5", "max_steps = 5\nworker_timeout_s = 42.5")
+    cfg = load_config(write_config(tmp_path, text))
+    assert cfg.limits.worker_timeout_s == 42.5
