@@ -1,0 +1,2 @@
+task,repo_url,commit,verifier,run_passed,score_passed,score_exit_code,cost_usd,tokens_in,tokens_out,unverified,log,error,baseline_status,baseline_exit_code,status,excluded_reason
+task-101,,,on,False,False,1,0.000000,1211,122,0,/tmp/maxcode-p1-smoke/bench-root/.maxcode/bench/20261101T111156-66cd44/task-101/run.jsonl,run stopped: error,failed,1,error,

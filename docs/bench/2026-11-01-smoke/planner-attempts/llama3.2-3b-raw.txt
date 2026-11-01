@@ -1,0 +1,21 @@
+=== RAW ===
+{"task": "Fix discounts.py", "steps": [{"id": 1, "goal": "Test for incorrect totals", "files": ["discounts.py"], "checks": ["test"], "edits_tests": true}]}
+=== JSON ===
+{
+  "task": "Fix discounts.py",
+  "steps": [
+    {
+      "id": 1,
+      "goal": "Test for incorrect totals",
+      "files": [
+        "discounts.py"
+      ],
+      "checks": [
+        "test"
+      ],
+      "edits_tests": true
+    }
+  ]
+}
+=== VALIDATE ===
+task='Fix discounts.py' steps=[PlanStep(id=1, goal='Test for incorrect totals', files=['discounts.py'], checks=['test'], edits_tests=True)]

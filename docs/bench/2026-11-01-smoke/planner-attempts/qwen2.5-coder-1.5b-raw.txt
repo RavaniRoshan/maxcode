@@ -1,0 +1,66 @@
+=== RAW ===
+{
+  "task": "The discount function gives wrong totals for large orders",
+  "steps": [
+    {
+      "id": 1,
+      "goal": ["Add tests to verify the behavior of the discount function in different scenarios"],
+      "files": ["discounts.py", "maxcode.toml", "pyproject.toml", "tests/test_discounts.py"],
+      "checks": ["cmd: test tests/test_discounts.py"],
+      "edits_tests": true
+    },
+    {
+      "id": 2,
+      "goal": ["Implement correct logic in the discount function to handle large orders correctly"],
+      "files": ["discounts.py", "maxcode.toml", "pyproject.toml", "test_discounts.py"],
+      "checks": ["cmd: test tests/test_discounts.py"],
+      "edits_tests": true
+    }
+  ]
+}
+=== JSON ===
+{
+  "task": "The discount function gives wrong totals for large orders",
+  "steps": [
+    {
+      "id": 1,
+      "goal": [
+        "Add tests to verify the behavior of the discount function in different scenarios"
+      ],
+      "files": [
+        "discounts.py",
+        "maxcode.toml",
+        "pyproject.toml",
+        "tests/test_discounts.py"
+      ],
+      "checks": [
+        "cmd: test tests/test_discounts.py"
+      ],
+      "edits_tests": true
+    },
+    {
+      "id": 2,
+      "goal": [
+        "Implement correct logic in the discount function to handle large orders correctly"
+      ],
+      "files": [
+        "discounts.py",
+        "maxcode.toml",
+        "pyproject.toml",
+        "test_discounts.py"
+      ],
+      "checks": [
+        "cmd: test tests/test_discounts.py"
+      ],
+      "edits_tests": true
+    }
+  ]
+}
+=== VALIDATE ===
+ValidationError 2 validation errors for Plan
+steps.0.goal
+  Input should be a valid string [type=string_type, input_value=['Add tests to verify the...in different scenarios'], input_type=list]
+    For further information visit https://errors.pydantic.dev/2.14/v/string_type
+steps.1.goal
+  Input should be a valid string [type=string_type, input_value=['Implement correct logic...large orders correctly'], input_type=list]
+    For further information visit https://errors.pydantic.dev/2.14/v/string_type

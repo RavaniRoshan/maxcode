@@ -1,0 +1,3 @@
+The planner did not return a valid plan after two attempts.
+Why: Last error: invalid plan JSON: 1 validation error for Plan
+Next: Check the planner model and provider, then run the task again.

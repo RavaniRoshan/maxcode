@@ -1,0 +1,21 @@
+[provider.local]
+base_url    = "http://127.0.0.1:11434/v1"
+api_key_env = "OLLAMA_API_KEY"
+
+[planner]
+provider = "local"
+model    = "llama3.2:3b"
+
+[worker]
+provider = "local"
+model    = "qwen2.5:3b"
+
+[limits]
+max_retries_per_step  = 2
+max_cost_usd_per_task = 0.50
+max_diff_lines        = 200
+max_steps             = 1
+worker_timeout_s      = 90
+
+[checks]
+test = "python -m pytest -q"

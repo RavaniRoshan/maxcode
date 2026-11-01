@@ -1,0 +1,6 @@
+Task: Fix discount function tests
+
+Step 1: Make existing tests pass
+  files: tests/test_discounts.py
+  checks: test
+  edits_tests: true

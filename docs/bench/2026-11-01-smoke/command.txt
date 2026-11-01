@@ -1,0 +1,33 @@
+Date: 2026-11-01
+Purpose: one verifier-on benchmark task (task-101) with local models.
+
+Task: src/maxcode/bench/tasks/synthetic/task-101
+Planner: Ollama llama3.2:3b
+Worker: Ollama qwen2.5:3b
+Engine: /home/shiva/.local/bin/maxcode-engine
+
+Two runs of the same task:
+1. run-600s/ uses maxcode.toml (worker_timeout_s = 600).
+2. session-capture/ uses session-capture/maxcode-90s.toml
+   (worker_timeout_s = 90) and points MAXCODE_HOME and CODEX_HOME at a
+   temporary directory so the engine sessions are captured. The only config
+   difference is the timeout.
+
+Both runs used a temporary git root outside the repository, with the config
+copied in as maxcode.toml:
+  /tmp/maxcode-p1-smoke/bench-root
+  /tmp/maxcode-p1-smoke/bench-root-90
+
+Command for run-600s (run from the temporary root):
+  OLLAMA_API_KEY=<placeholder> \
+  MAXCODE_ENGINE_BIN=/home/shiva/.local/bin/maxcode-engine \
+  MAXCODE_REASONING_EFFORT=none \
+  MAXCODE_MODEL_CONTEXT_WINDOW=16384 \
+  uv run --project /home/shiva/projects/maxm1 maxcode bench --verifier on \
+    --suite /home/shiva/projects/maxm1/src/maxcode/bench/tasks/synthetic/task-101
+
+Command for session-capture (same, with the 90s config and):
+  MAXCODE_HOME=/tmp/maxcode-p1-smoke/engine-home-90 \
+  CODEX_HOME=/tmp/maxcode-p1-smoke/engine-home-90 \
+
+Result: see README.md. Planner probes are under planner-attempts/.
