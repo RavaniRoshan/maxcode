@@ -11,6 +11,7 @@ from maxcode import __version__
 from maxcode.checkpoints import delete_ref, latest_ref, restore
 from maxcode.config import load_config
 from maxcode.cost import CostMeter
+from maxcode.doctor import run_doctor
 from maxcode.errors import ConfigError, MaxcodeError, NotAGitRepo
 from maxcode.loop import _repo_summary, run_task
 from maxcode.roles.planner import make_plan
@@ -264,3 +265,14 @@ def bench(
 def version() -> None:
     """Show the installed version."""
     typer.echo(f"maxcode {__version__}")
+
+
+@app.command()
+def doctor() -> None:
+    """Check git, the engine, the config, the endpoints, and the checks."""
+    results = run_doctor()
+    for result in results:
+        typer.echo(f"{result.status} {result.name}: {result.detail}")
+        if result.fix:
+            typer.echo(f"  fix: {result.fix}")
+    raise typer.Exit(code=0 if not any(item.status == "FAIL" for item in results) else 1)
