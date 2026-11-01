@@ -1,0 +1,3 @@
+Reading additional input from stdin...
+2026-11-01T09:47:09.126027Z ERROR maxcode_core::tools::router: error=write_stdin failed: Unknown process id 1
+2026-11-01T09:47:09.643756Z ERROR maxcode_core::tools::router: error=unable to locate image at `/tmp/maxcode-reverify-2026-11-01/qwen3-1.7b-attempt2/repo/hello.txt`: No such file or directory (os error 2)

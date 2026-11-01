@@ -1,0 +1,6 @@
+Task: Ensure the project's test suite passes. Do not weaken or delete tests.
+
+Step 1: Add a test that fails now to ensure the test suite passes
+  files: tests/conftest.py
+  checks: test
+  edits_tests: true

@@ -29,27 +29,35 @@ support, so the endpoint must expose `/v1/responses`.
 ## Ollama
 
 Ollama 0.31.1 works with the adapter when the worker command disables web
-search and multi-agent tools. The adapter does this by default. A working local
-config:
+search and multi-agent tools. The adapter does this by default. A working
+worker config, with the hosted planner used in the live demo:
 
 ```toml
+[provider.pollinations]
+base_url    = "https://text.pollinations.ai/openai"
+api_key_env = "POLLINATIONS_KEY"
+
 [provider.local]
 base_url    = "http://127.0.0.1:11434/v1"
 api_key_env = "OLLAMA_API_KEY"
 
 [planner]
-provider = "local"
-model    = "llama3.2:3b"
+provider = "pollinations"
+model    = "openai"
 
 [worker]
 provider = "local"
-model    = "llama3.2:3b"
+model    = "qwen2.5:3b"
 ```
 
 Set `OLLAMA_API_KEY=local`; Ollama ignores the value. The adapter reads
 `MAXCODE_REASONING_EFFORT` (default `low`) and
 `MAXCODE_MODEL_CONTEXT_WINDOW` (optional). The live runs used `none` and
 `16384`.
+
+A local 3B planner is not reliable enough: on 2026-11-01 `qwen2.5:3b` failed
+the plan schema, and `llama3.2:3b` proposed editing tests. The probes are in
+`docs/BENCH.md`.
 
 ## Engine selection
 

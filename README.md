@@ -24,29 +24,31 @@
 
 ## The problem
 
-Most coding tools stop when the model stops talking. The change may compile. It
-may even look right. But nobody ran the tests, so "done" is a guess.
+A model stopping is not evidence that the work is done. The change may compile.
+It may even look right. But unless the tests ran, "done" is still a guess.
 
 maxcode separates **doing the work** from **declaring it finished**. A planner
 splits the task into steps. A worker edits one step at a time. A verifier runs
 the repository's own checks. Only a clean verifier run closes the step.
 
-Real output from a local Ollama run with the configuration below
-([`spike/ollama-llama3.2-3b/maxcode-run/`](spike/ollama-llama3.2-3b/maxcode-run/)):
+Real output from the 2026-11-01 local Ollama run
+([`spike/ollama-qwen2.5-3b/reverify-2026-11-01/maxcode-run/`](spike/ollama-qwen2.5-3b/reverify-2026-11-01/maxcode-run/)):
 
 ```text
-$ maxcode run --yes "Edit app.py so add(a, b) returns a + b. Use the exec_command
-tool to run sed -i 's/return a - b/return a + b/' app.py. Then run python -m pytest -q
-to confirm. Do not change tests."
+$ maxcode run --yes --config maxcode.toml "Edit app.py so add(a, b) returns a + b.
+Use the exec_command tool to run sed -i 's/return a - b/return a + b/' app.py.
+Then run python3 -m pytest -q to confirm. Do not change tests."
 
-steps: 1/1  cost: $0.0000  tokens: 7182 in / 1067 out
+steps: 1/1  cost: $0.0000  tokens: 7393 in / 1293 out
 cost is partial: some calls lacked a price or a token count
 ```
 
 The run log records `test: passed` and `run_end.passed = true`. The demo
-repository has one test, not six. The same loop also passed with
-`qwen3:1.7b` (7152 input / 1264 output tokens,
-[`spike/ollama-qwen3-1.7b/`](spike/ollama-qwen3-1.7b/)).
+repository has one test. The loop also passed with `llama3.2:3b` on
+2026-10-31 (7182 in / 1067 out,
+[`spike/ollama-llama3.2-3b/maxcode-run/`](spike/ollama-llama3.2-3b/maxcode-run/)).
+`qwen3:1.7b` did the same that day (7152 / 1264) but failed 3/3 on 2026-11-01,
+so it is not a reliable worker; see [`SPIKE.md`](SPIKE.md).
 
 ## What maxcode guarantees
 
@@ -56,7 +58,7 @@ repository has one test, not six. The same loop also passed with
 | **What happens on failure?** | The step retries from its git checkpoint, up to the limit, then stops. |
 | **What is the evidence?** | A JSONL run log with check exit codes, token usage, and cost. |
 | **Can I undo?** | `maxcode undo` restores the last checkpoint. |
-| **Which model?** | Any OpenAI-compatible Responses endpoint. |
+| **Which model?** | An OpenAI-compatible Responses endpoint. Live-tested with Ollama 0.31.1; other endpoints are not yet verified. |
 | **Where is the key?** | Environment variables only. |
 
 These are guarantees about what maxcode does, not claims about other tools. As
@@ -103,6 +105,9 @@ The adapter looks for an engine in this order:
 2. `maxcode-engine` on `PATH`.
 3. `codex` on `PATH`, when its version is 0.165.0 or newer.
 
+If your repository lives under `/tmp`, stock Codex cannot create its sandbox
+helper there. Use a repository outside `/tmp`, or the fork.
+
 Stock Codex and `maxcode-engine` produced the same event types on the same live
 task; the comparison is in [`SPIKE.md`](SPIKE.md) and
 [`spike/engine-comparison/`](spike/engine-comparison/).
@@ -134,12 +139,13 @@ No hidden download, and no key baked into the binary.
 
 ## Configure
 
-Create `maxcode.toml` in your project. The provider can be OpenRouter, Together,
-Groq, Fireworks, a local server, or anything that speaks the OpenAI-compatible
-Responses API. Codex 0.165 removed Chat Completions support, so the engine side
-must expose `/v1/responses`.
+Create `maxcode.toml` in your project. The endpoint must speak the
+OpenAI-compatible Responses API. Codex 0.165 removed Chat Completions support,
+so the engine side must expose `/v1/responses`. The live logs use a local Ollama
+endpoint; other endpoints are not yet verified.
 
-This is the configuration that produced the live logs in `spike/`:
+These provider and model settings match the live logs in `spike/`; the limits
+are the general defaults, not the demo's reduced values.
 
 ```toml
 [provider.pollinations]
@@ -156,7 +162,7 @@ model    = "openai"          # the service's alias for gpt-oss-20b
 
 [worker]
 provider = "local"
-model    = "llama3.2:3b"
+model    = "qwen2.5:3b"
 
 [limits]
 max_retries_per_step  = 3
@@ -166,7 +172,7 @@ max_steps             = 12
 ```
 
 ```bash
-ollama pull llama3.2:3b
+ollama pull qwen2.5:3b
 export POLLINATIONS_KEY=anonymous   # the anonymous tier needs a non-empty value
 export OLLAMA_API_KEY=local         # Ollama ignores the value
 ```
@@ -178,8 +184,11 @@ because no funded OpenRouter credential was available for a live log; the same
 
 The planner must return the JSON plan. A 1.5B planner
 (`qwen2.5-coder:1.5b`) returned plans that invented unavailable linters in the
-benchmark; choose a planner that can follow the schema. The worker can be a
-smaller model: both `qwen3:1.7b` and `llama3.2:3b` produced live edits.
+benchmark. On 2026-11-01 a 2.5B planner either failed the schema or invented
+checks, and a 3B planner proposed editing tests; the probes are in
+[`docs/BENCH.md`](docs/BENCH.md). The worker can be smaller: `qwen2.5:3b` and
+`llama3.2:3b` produced live edits on 2026-11-01. `qwen3:1.7b` did on
+2026-10-31 but failed 3/3 on re-run.
 
 ## Demo
 
@@ -218,16 +227,22 @@ model    = "openai"
 
 [worker]
 provider = "local"
-model    = "llama3.2:3b"
+model    = "qwen2.5:3b"
+
+[limits]
+max_retries_per_step  = 2
+max_cost_usd_per_task = 0.50
+max_diff_lines        = 200
+max_steps             = 1
 
 [checks]
-test = "python -m pytest -q"
+test = "python3 -m pytest -q"
 TOML
 
-ollama pull llama3.2:3b
+ollama pull qwen2.5:3b
 export POLLINATIONS_KEY=anonymous OLLAMA_API_KEY=local
 
-maxcode run --yes "Edit app.py so add(a, b) returns a + b. Use the exec_command tool to run sed -i 's/return a - b/return a + b/' app.py. Then run python -m pytest -q to confirm. Do not change tests."
+maxcode run --yes --config maxcode.toml "Edit app.py so add(a, b) returns a + b. Use the exec_command tool to run sed -i 's/return a - b/return a + b/' app.py. Then run python3 -m pytest -q to confirm. Do not change tests."
 ```
 
 Exit code `0` means the verifier passed. Anything else means the work is not
@@ -307,19 +322,27 @@ The 2026-10-31 run used a 3-task subset of the default suite (one task each from
 **The absolute gain is 0 percentage points.** The verifier-on arm hit the
 300-second worker timeout before verification, and the repositories were
 unchanged, so the final score still passed. This is a ceiling effect, not
-evidence of an advantage. `psf/requests` is excluded because its pinned commit
-already fails 4 tests on a clean checkout. Read
-[`docs/BENCH.md`](docs/BENCH.md) for every failure.
+evidence of an advantage. The worker, `qwen3:1.7b`, also failed 3/3 on a
+2026-11-01 re-run, so the timeout was not the verifier's doing.
+`psf/requests` is excluded because its pinned commit already fails 4 tests on
+a clean checkout.
+
+A fresh full-suite run could not start on 2026-11-01: Pollinations returned
+HTTP 400, and every local planner either failed the schema or proposed editing
+tests. The probes are committed under
+[`docs/bench/2026-11-01/planner-probes/`](docs/bench/2026-11-01/planner-probes/).
+No new score is published. Read [`docs/BENCH.md`](docs/BENCH.md) for every
+failure and the blocker.
 
 ```bash
-maxcode bench --verifier on
-maxcode bench --verifier off
+maxcode bench --verifier on  --suite docs/bench/2026-10-31/suite3
+maxcode bench --verifier off --suite docs/bench/2026-10-31/suite3
 uv run python -m maxcode.bench.report .maxcode/bench
 ```
 
-The default suite is four pinned Python projects repeated five times each. A
-published score must link to its raw log; this README does not publish one
-without it.
+The default suite is four pinned Python projects repeated five times each; the
+published run used a 3-task subset and says so. A published score must link to
+its raw log; this README does not publish one without it.
 
 ## Architecture
 
@@ -357,25 +380,35 @@ v0.1.0-alpha.1.
 
 **Live-verified** (logs in [`spike/`](spike/)):
 
-- planner -> worker -> verifier loop on Ollama `qwen3:1.7b` and `llama3.2:3b`;
-- multi-turn tool calls, file edits that land on disk, and `turn.completed` usage;
+- planner -> worker -> verifier loop on Ollama `qwen2.5:3b` and (on 2026-10-31)
+  `llama3.2:3b`;
+- multi-turn tool calls, file edits that land on disk, and `turn.completed` usage
+  on both models on 2026-11-01;
 - the verifier gate (`1 passed in 0.01s`) and `run_end.passed = true`;
 - stock Codex 0.165 and `maxcode-engine` produce the same event types on the
-  same task.
+  same task; stock passed 3/3 trials and the fork 2/2 on `qwen2.5:3b`.
+
+`qwen3:1.7b` completed the same loop on 2026-10-31 but failed 3/3 on 2026-11-01.
+It is not a dependable worker; see [`SPIKE.md`](SPIKE.md).
 
 **Mock/offline-verified:**
 
-- the full CLI state machine and 115 offline tests;
-- OpenRouter, Hugging Face, and DeepSeek wire shapes, without a funded credential.
+- the full CLI state machine and 117 offline tests;
+- the generic OpenAI-compatible chat shape, with a mock HTTP transport. No
+  provider-specific OpenRouter, Hugging Face, or DeepSeek wire shape was tested.
 
 **Not verified:**
 
 - live runs on the original OpenRouter models `qwen/qwen3-coder-next` and
   `deepseek/deepseek-v3.2`; no funded credential exists in this environment;
-- a benchmark gain above 10 points. See [`docs/BENCH.md`](docs/BENCH.md).
+- a benchmark gain above 10 points. The published run shows 0.0 points and a
+  ceiling effect. See [`docs/BENCH.md`](docs/BENCH.md);
+- a full-suite benchmark with a reliable planner. The 2026-11-01 probe run is
+  blocked and its logs are committed under `docs/bench/2026-11-01/`.
 
-The badge stays alpha until a funded-provider run and a wider benchmark exist.
-The project is deliberately small enough to audit.
+The badge stays alpha until a funded-provider run and a full-suite benchmark
+with a reliable planner exist. The project is deliberately small enough to
+audit.
 
 ## Legal
 

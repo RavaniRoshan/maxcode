@@ -25,15 +25,25 @@ final score still passed. This is a ceiling effect, not evidence of an advantage
 - Verifier-on task-001 and task-002 timed out at 300 seconds; task-003 had no
   worker call. The verifier never ran in that arm.
 - Both arms produced zero diffs on already-green repositories.
+- The worker, `qwen3:1.7b`, failed 3/3 on a 2026-11-01 re-run, so the timeout was
+  not the verifier's doing.
 - `psf/requests` was excluded: four tests fail on a clean checkout in this
   environment, so its score command cannot pass regardless of the model.
 - OpenRouter, Hugging Face, and DeepSeek had no credential and were not run.
 
+## 2026-11-01 fresh-run blocker
+
+A fresh full-suite run could not start on 2026-11-01: Pollinations returned
+HTTP 400, and every local planner either failed the `Plan` schema or proposed
+editing tests. The probes are committed under
+[`docs/bench/2026-11-01/planner-probes/`](https://github.com/RavaniRoshan/maxcode/tree/main/docs/bench/2026-11-01/planner-probes).
+No new score is published.
+
 ## Reproduce
 
 ```bash
-maxcode bench --verifier on
-maxcode bench --verifier off
+maxcode bench --verifier on  --suite docs/bench/2026-10-31/suite3
+maxcode bench --verifier off --suite docs/bench/2026-10-31/suite3
 uv run python -m maxcode.bench.report .maxcode/bench
 ```
 

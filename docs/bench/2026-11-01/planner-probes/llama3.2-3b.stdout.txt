@@ -1,0 +1,9 @@
+Task: Ensure the project's test suite passes.
+
+Step 1: Add failing unit test to catch a recent regression
+  checks: test
+  edits_tests: true
+Step 2: Fix the bug that's causing the regression
+  files: src/click/exceptions.py
+  checks: build, lint
+  edits_tests: false

@@ -1,0 +1,3 @@
+The provider returned HTTP 400.
+Why: The request for model 'openai' failed. Response: {"success":false,"error":{"message":"The model exhausted its output token limit before producing an answer. Increase the token limit or reduce reasoning effort.","code":"output_token_limit_exceeded","timestamp":"2026-11-01T10:26:21.021Z","details":{"name":"UpstreamError","upstreamHost":"portkey.myceli.ai"}},"status":400}
+Next: Check the base URL, the model name, and the API key, then retry.

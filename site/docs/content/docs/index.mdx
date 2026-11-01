@@ -30,13 +30,17 @@ documented. Read [the benchmark page](/docs/benchmark).
 
 ## What is verified
 
-The live evidence in this repository comes from local Ollama models:
-`qwen3:1.7b` and `llama3.2:3b` made multi-turn tool calls, edited files on disk,
-and closed a step only after `pytest` passed. The original OpenRouter models
-remain unverified because no funded credential was available.
+The live evidence in this repository comes from local Ollama workers:
+`qwen2.5:3b` and `llama3.2:3b` made multi-turn tool calls, edited files on disk,
+and closed a step only after `pytest` passed. A full loop with
+`qwen2.5:3b` and the Pollinations planner is in `spike/`. `qwen3:1.7b` did the
+same on 2026-10-31 but failed 3/3 on 2026-11-01, so it is not a dependable
+worker. The original OpenRouter models remain unverified because no funded
+credential was available.
 
 The benchmark result is published with its logs: 3/3 in both verifier arms, a
-0-point gain, and the verifier-on timeout documented. See
+0-point gain, and the verifier-on timeout documented. A fresh full-suite run on
+2026-11-01 is blocked on planner quality; the probes are committed. See
 [the benchmark page](/docs/benchmark) and
 [`docs/BENCH.md`](https://github.com/RavaniRoshan/maxcode/blob/main/docs/BENCH.md).
 

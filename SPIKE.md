@@ -1,17 +1,20 @@
 # SPIKE: Phase 0
 
-Status: **complete, live-verified on a local open-weight model.** On 2026-10-31,
-`maxcode-engine` completed multi-turn tool-calling tasks against Ollama 0.31.1
-with `qwen3:1.7b` and `llama3.2:3b`, emitted `turn.completed` usage, and created
-the requested files on disk. The full `maxcode run` loop also passed its
-verifier with both models. The two originally planned OpenRouter models remain unverified because
-no funded key exists in this environment; their exact failure is in section 5.
+Status: **live-verified on two local open-weight models on 2026-11-01.**
+`maxcode-engine` completed the section 2 task against Ollama 0.31.1 with
+`qwen2.5:3b` and `llama3.2:3b`, emitted `turn.completed` usage, and created the
+requested files on disk. A full `maxcode run` loop also closed a step only after
+`pytest` passed. The earlier `qwen3:1.7b` success on 2026-10-31 is real, but the
+model failed 3 out of 3 re-runs on 2026-11-01; it is not a dependable worker.
+The two originally planned OpenRouter models remain unverified because no
+funded key exists in this environment; their exact failure is in section 5.
 
-- Date of live runs: 2026-10-31
+- Dates of live runs: 2026-10-31 and 2026-11-01
 - Engine: `maxcode-engine` 0.1.0, built from Codex `rust-v0.165.0` (commit `360319d`)
 - Stock comparison: `@openai/codex` 0.165.0 from npm, run in a temporary prefix
 - Local provider: Ollama 0.31.1 at `http://127.0.0.1:11434/v1`
-- Raw evidence: [`spike/`](spike/)
+- Raw evidence: [`spike/`](spike/); the 2026-11-01 re-runs are under each
+  model's `reverify-2026-11-01/` directory.
 
 ## 1. Wrapper or fork
 
@@ -23,10 +26,18 @@ selects, in order:
 3. `codex` on `PATH`, when its `--version` is 0.165.0 or newer.
 
 Stock Codex 0.165.0 accepts a custom OpenAI-compatible provider through
-`model_providers.<id>` with `wire_api = "responses"`. Stock Codex and
-`maxcode-engine` produced the same event types on the same live task (section 8).
-The fork remains useful only if a future Codex change blocks a provider we need,
-or if we need to patch the engine itself.
+`model_providers.<id>` with `wire_api = "responses"`. On 2026-11-01, stock Codex
+and `maxcode-engine` each completed the same live task with `qwen2.5:3b`
+(stock 3/3 trials, fork 2/2 trials). The event vocabulary and order were
+identical; the only difference was the number of `command_execution` items,
+which reflects the model's command choices rather than a schema difference
+(section 9). The fork remains useful only if a future Codex change blocks a
+provider we need, or if we need to patch the engine itself.
+
+One stock-Codex environment constraint: it refuses to create its sandbox
+helper binaries when `CODEX_HOME` is under `/tmp`. Use a home directory
+outside `/tmp`. The first comparison attempt failed this way and is kept in
+`spike/engine-comparison/reverify-2026-11-01/stock-codex-tmp-home-failure/`.
 
 Codex source paths:
 
@@ -152,7 +163,7 @@ amount is not an API bill.
 - Reasoning: the adapter defaults to `low` and reads `MAXCODE_REASONING_EFFORT`.
   The live runs set `none`.
 
-## 5. Live provider attempt matrix (2026-10-31)
+## 5. Live provider attempt matrix (2026-10-31 and 2026-11-01)
 
 | Provider | Model | Endpoint | Result | Evidence |
 |---|---|---|---|---|
@@ -160,15 +171,56 @@ amount is not an API bill.
 | Hugging Face Router | `Qwen/Qwen2.5-1.5B-Instruct` | `https://router.huggingface.co/v1` | No credential in env; engine exits 1 with `Missing environment variable: HF_TOKEN`. Unauthenticated HTTP probe: 401 (HTML login page). | `spike/huggingface-qwen2.5-1.5b/` |
 | DeepSeek | `deepseek-chat` | `https://api.deepseek.com/v1` | No credential in env; engine exits 1 with `Missing environment variable: DEEPSEEK_API_KEY`. Unauthenticated HTTP probe: 401 `Authentication Fails (governor)`. | `spike/deepseek-deepseek-chat/` |
 | Pollinations AI | `gpt-oss-20b` (`openai`) | `https://text.pollinations.ai/openai` | Chat Completions works anonymously (HTTP 200). Its `/v1/responses` path returns a chat-completion body, and `/v1/responses` returns 404, so it cannot serve Codex 0.165. Anonymous tier: one reply per 45 s. | `spike/pollinations-gpt-oss-20b/` |
-| Ollama 0.31.1 | `qwen3:1.7b` | `http://127.0.0.1:11434/v1` | **Success.** Multi-turn tool calls, `turn.completed` usage, `hello.txt` created, full loop passed. | `spike/ollama-qwen3-1.7b/` |
-| Ollama 0.31.1 | `llama3.2:3b` | `http://127.0.0.1:11434/v1` | **Success.** Multi-turn tool calls, `turn.completed` usage, `hello.txt` created, full loop passed. | `spike/ollama-llama3.2-3b/` |
+| Ollama 0.31.1 | `qwen3:1.7b` | `http://127.0.0.1:11434/v1` | **2026-10-31 success, not reproduced.** Succeeded once with 2 tool calls, usage, and `hello.txt`. On 2026-11-01 it failed 3/3: no file, either an approval request the non-interactive policy rejects or a `cat` before the file exists. Not dependable. | `spike/ollama-qwen3-1.7b/` and `spike/ollama-qwen3-1.7b/reverify-2026-11-01/` |
+| Ollama 0.31.1 | `llama3.2:3b` | `http://127.0.0.1:11434/v1` | **Success; re-verified 2026-11-01.** 4 tool calls, `turn.completed` usage 2748/379, `hello.txt` created. The 2026-10-31 full loop also passed. | `spike/ollama-llama3.2-3b/` and `spike/ollama-llama3.2-3b/reverify-2026-11-01/` |
+| Ollama 0.31.1 | `qwen2.5:3b` | `http://127.0.0.1:11434/v1` | **Success on 2026-11-01.** 4 tool calls, `turn.completed` usage 8663/215, `hello.txt` created. The full `maxcode run` loop also passed: exit 0, `1 passed`, 7393/1293 tokens. | `spike/ollama-qwen2.5-3b/reverify-2026-11-01/` |
+| Ollama 0.31.1 | `qwen3:4b` | `http://127.0.0.1:11434/v1` | Fails. The model spent 3025 output tokens on visible reasoning and printed a text tool call instead of emitting `function_call`. No file created. | `spike/ollama-qwen3-4b/reverify-2026-11-01/` |
 | Ollama 0.31.1 | `qwen2.5-coder:1.5b` | `http://127.0.0.1:11434/v1` | Model does not emit structured tool calls; it returns the call as text. Not usable as a worker. | `spike/ollama-qwen2.5-coder-1.5b/` |
 
 The earlier OpenRouter HTTP 402 (`insufficient credits`) is retained in the
 history below. It cannot be re-run without the original key, and no key is
 present in this environment.
 
-## Run log: model 1 (success)
+## Run log: 2026-11-01 (re-verification)
+
+Model 1: `qwen2.5:3b` (open weights) via Ollama 0.31.1.
+
+Raw engine task: the section 2 `hello.txt` task.
+
+- exit code 0
+- four `command_execution` items
+- `turn.completed` usage: 8663 input tokens, 215 output tokens
+- `hello.txt` exists on disk and contains `hello`
+- evidence: `spike/ollama-qwen2.5-3b/reverify-2026-11-01/hello-engine/`
+
+Full loop (`spike/ollama-qwen2.5-3b/reverify-2026-11-01/maxcode-run/`):
+
+- planner: Pollinations `gpt-oss-20b` (Chat Completions)
+- worker: `qwen2.5:3b` through `maxcode-engine`
+- verifier: `python3 -m pytest -q`
+- command: `maxcode run --yes --config maxcode.toml "Edit app.py so add(a, b)
+  returns a + b ..."`
+- result: exit 0, `steps: 1/1`, `1 passed in 0.01s`, `run_end.passed = true`,
+  `app.py` changed from `return a - b` to `return a + b`
+- tokens: 7393 input, 1293 output; dollar cost `0.0000` (no pricing entry,
+  reported as partial)
+- caveat: the planner returned a `cmd:sed ...` check in addition to `test`.
+  With `--yes`, the approved check ran the edit, so this particular loop run
+  did not exercise the worker edit path. The engine run above does. The
+  verifier gate is still real: the step closed only after `pytest` passed.
+
+Model 2: `llama3.2:3b` (open weights) via Ollama 0.31.1.
+
+Raw engine task: the same `hello.txt` task.
+
+- exit code 0
+- four `command_execution` items
+- `turn.completed` usage: 2748 input tokens, 379 output tokens
+- `hello.txt` exists on disk and contains `hello`
+- evidence: `spike/ollama-llama3.2-3b/reverify-2026-11-01/hello-engine/`
+- the 2026-10-31 full loop for this model is unchanged below.
+
+## Run log: 2026-10-31 model 1 (qwen3:1.7b; success, not reproduced)
 
 Model: `qwen3:1.7b` (open weights) via Ollama 0.31.1.
 
@@ -200,7 +252,13 @@ Full loop (`spike/ollama-qwen3-1.7b/maxcode-run/`):
 - tokens: 7152 input, 1264 output; dollar cost `0.0000` (no pricing entry,
   reported as partial)
 
-## Run log: model 2 (success)
+Re-run note (2026-11-01): the same section 2 command failed 3/3 on this model.
+The attempts are in `spike/ollama-qwen3-1.7b/reverify-2026-11-01/`: two asked
+for an approval the non-interactive policy cannot grant, and one ran
+`cat hello.txt` before creating the file. The 2026-10-31 log above is real;
+the model is not a dependable worker.
+
+## Run log: 2026-10-31 model 2 (llama3.2:3b; success)
 
 Model: `llama3.2:3b` (open weights) via Ollama 0.31.1.
 
@@ -249,14 +307,42 @@ Both exited 0, created `hello.txt` containing `hello`, and emitted
 failed `nano hello.txt` command in the stock run, which is a model choice, not a
 schema difference.
 
+Re-verification on 2026-11-01 with `qwen2.5:3b`:
+
+- stock Codex 0.165.0: 3/3 trials exit 0, `hello.txt` created, usage emitted.
+- `maxcode-engine` 0.1.0: 2/2 trials exit 0, `hello.txt` created, usage emitted.
+- The event vocabulary and order are identical. The only difference is the
+  number of `command_execution` items (the model ran a different number of
+  shell commands). See
+  `spike/engine-comparison/reverify-2026-11-01/event-types.diff`.
+
 | Binary | Input tokens | Output tokens | File created |
 |---|---:|---:|---|
 | stock Codex 0.165.0 | 10491 | 182 | yes |
 | maxcode-engine 0.1.0 | 8204 | 202 | yes |
+| stock Codex 0.165.0 (2026-11-01, `qwen2.5:3b`) | 4140 | 189 | yes |
+| maxcode-engine 0.1.0 (2026-11-01, `qwen2.5:3b`) | 8663 | 215 | yes |
+
+Token counts differ between the binaries because the model made different
+command choices and because the two runs have different conversation lengths,
+not because the usage schema differs.
+
+Two caveats from the 2026-11-01 trials:
+
+- Stock Codex refuses to create its sandbox helper binaries when `CODEX_HOME`
+  is under `/tmp`. The first attempt exited 0 but executed no commands. Use a
+  home directory outside `/tmp`; the failed log is in
+  `spike/engine-comparison/reverify-2026-11-01/stock-codex-tmp-home-failure/`.
+- Small-model tool calling is not deterministic. The first stock `qwen2.5:3b`
+  attempt failed with `failed to parse function arguments: invalid type: null,
+  expected u64`; repeated trials succeeded. Two stock `llama3.2:3b` attempts
+  also failed (no tool call, then malformed arguments), while the fork
+  completed the same llama task once.
 
 The adapter's unit tests cover all three selection paths:
 `MAXCODE_ENGINE_BIN`, `maxcode-engine` on `PATH`, and `codex` 0.165+ on `PATH`.
-A `codex` older than 0.165 is rejected with an actionable error.
+A `codex` older than 0.165 is rejected with an actionable error. The test file
+is `tests/test_engine.py`.
 
 ## Assumption A1: GitHub search
 
@@ -284,9 +370,10 @@ The benchmark should test the claimed advantage, not absolute novelty.
 
 ## Blockers
 
-- The originally supplied OpenRouter key returned HTTP 402 (insufficient
-  credits), and free model slugs returned HTTP 404. No funded OpenRouter,
-  Hugging Face, or DeepSeek credential is present in this environment.
+- No funded hosted credential is present. The originally supplied OpenRouter
+  key returned HTTP 402 (insufficient credits), and free model slugs returned
+  HTTP 404. OpenRouter, Hugging Face, and DeepSeek all return 401 or a missing
+  environment variable here; see section 5 and `spike/`.
 - Live runs on `qwen/qwen3-coder-next` and `deepseek/deepseek-v3.2` therefore
   remain unverified. The local Ollama runs in this file are the substitute
   evidence, and they use open-weight models.
@@ -294,11 +381,22 @@ The benchmark should test the claimed advantage, not absolute novelty.
   with Codex when non-function tools or long reasoning are present. The working
   configuration is documented in sections 1 and 2. A production adapter for
   Ollama should keep those overrides.
+- `qwen3:1.7b` is unstable. It succeeded on 2026-10-31 but failed 3/3 on
+  2026-11-01. Do not present it as a dependable worker.
+- A fresh full-suite benchmark is blocked on planner quality. On 2026-11-01,
+  Pollinations `gpt-oss-20b` returned HTTP 400
+  `output_token_limit_exceeded` on every planner retry; `qwen2.5:3b` either
+  failed the `Plan` schema or invented checks such as `cmd:pre-commit-checks`;
+  `llama3.2:3b` proposed adding or modifying tests; `qwen3:1.7b` ignored
+  `max_steps` and set `edits_tests: true`. The committed 2026-10-31 benchmark
+  used a 1.5B planner and is documented in `docs/BENCH.md`; its 0-point result
+  does not establish a verifier advantage.
 
 ## T0 completion note
 
-T0's exit rule was "one task completes on a non-OpenAI model". That is now met:
-`qwen3:1.7b` completed a coding task through `maxcode-engine`, and the full
-`maxcode run` loop closed a step only after `pytest` passed. The run was local,
+T0's exit rule was "one task completes on a non-OpenAI model". That is met on
+two models: `qwen2.5:3b` and `llama3.2:3b` both completed the section 2 task
+through `maxcode-engine` on 2026-11-01, and a full `maxcode run` loop with
+`qwen2.5:3b` closed a step only after `pytest` passed. The runs were local,
 free of API charges, and used temp directories only. No key was written to a
 file, log, checkpoint, or commit.

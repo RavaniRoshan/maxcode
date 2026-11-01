@@ -55,6 +55,33 @@ def test_engine_binary_falls_back_to_codex_0165(
     assert _binary() == str(binary)
 
 
+def test_engine_binary_env_beats_path_binaries(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    override = write_executable(tmp_path / "override", "#!/bin/sh\nexit 0\n")
+    write_executable(tmp_path / "maxcode-engine", "#!/bin/sh\nexit 0\n")
+    write_executable(
+        tmp_path / "codex",
+        '#!/bin/sh\n[ "$1" = "--version" ] && echo "codex-cli 0.165.0"\nexit 0\n',
+    )
+    monkeypatch.setenv("MAXCODE_ENGINE_BIN", str(override))
+    monkeypatch.setenv("PATH", str(tmp_path))
+    assert _binary() == str(override)
+
+
+def test_engine_binary_prefers_maxcode_engine_over_codex(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    engine = write_executable(tmp_path / "maxcode-engine", "#!/bin/sh\nexit 0\n")
+    write_executable(
+        tmp_path / "codex",
+        '#!/bin/sh\n[ "$1" = "--version" ] && echo "codex-cli 0.165.0"\nexit 0\n',
+    )
+    monkeypatch.delenv("MAXCODE_ENGINE_BIN", raising=False)
+    monkeypatch.setenv("PATH", str(tmp_path))
+    assert _binary() == str(engine)
+
+
 def test_engine_binary_rejects_old_codex(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:

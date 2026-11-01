@@ -1,0 +1,4 @@
+Reading additional input from stdin...
+2026-11-01T09:43:15.188871Z ERROR maxcode_core::tools::router: error=write_stdin failed: Unknown process id 1
+2026-11-01T09:43:15.648852Z ERROR maxcode_core::tools::router: error=unable to locate image at `/tmp/maxcode-reverify-2026-11-01/qwen3-1.7b/repo/hello.txt`: No such file or directory (os error 2)
+2026-11-01T09:43:16.997026Z ERROR maxcode_core::tools::router: error=approval policy is Never; reject command — you cannot ask for escalated permissions if the approval policy is Never

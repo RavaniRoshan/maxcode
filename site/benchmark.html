@@ -122,13 +122,13 @@
             </tbody>
           </table>
         </div>
-        <p><strong>The verifier-on arm hit the 300-second worker timeout before verification.</strong> The repositories were unchanged, so the final score still passed. This is a ceiling effect, not evidence of an advantage. The full method and every failure are in <a href="https://github.com/RavaniRoshan/maxcode/blob/main/docs/BENCH.md">docs/BENCH.md</a>.</p>
+        <p><strong>The verifier-on arm hit the 300-second worker timeout before verification.</strong> The repositories were unchanged, so the final score still passed. This is a ceiling effect, not evidence of an advantage. The worker, <code>qwen3:1.7b</code>, failed 3/3 on a 2026-11-01 re-run, so the timeout was not the verifier's doing. A fresh full-suite run on 2026-11-01 is blocked on planner quality; the probes are committed under <code>docs/bench/2026-11-01/planner-probes/</code>. The full method, every failure, and the blocker are in <a href="https://github.com/RavaniRoshan/maxcode/blob/main/docs/BENCH.md">docs/BENCH.md</a>.</p>
         <p class="note small muted"><strong>Excluded:</strong> <code>psf/requests</code> at its pinned commit already fails four tests on a clean checkout in this environment. Its score command cannot pass regardless of the model, so it is not counted as a pass or a fail.</p>
 
         <h2>Reproduce</h2>
         <div class="code-block">
-          <pre><code id="bench-cmd">maxcode bench --verifier on
-maxcode bench --verifier off
+          <pre><code id="bench-cmd">maxcode bench --verifier on  --suite docs/bench/2026-10-31/suite3
+maxcode bench --verifier off --suite docs/bench/2026-10-31/suite3
 uv run python -m maxcode.bench.report .maxcode/bench</code></pre>
           <button class="copy" data-copy="#bench-cmd" type="button" aria-label="Copy benchmark commands">copy</button>
         </div>

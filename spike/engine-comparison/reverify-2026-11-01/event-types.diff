@@ -1,0 +1,10 @@
+--- spike/engine-comparison/reverify-2026-11-01/stock-codex-0.165-qwen2.5-3b/event-types.txt	2026-11-01 10:21:51.012767871 +0000
++++ spike/engine-comparison/reverify-2026-11-01/maxcode-engine-0.1.0-qwen2.5-3b/event-types.txt	2026-11-01 10:21:51.034767871 +0000
+@@ -4,7 +4,5 @@
+ item.completed error
+ item.started command_execution
+ item.completed command_execution
+-item.started command_execution
+-item.completed command_execution
+ item.completed agent_message
+ turn.completed

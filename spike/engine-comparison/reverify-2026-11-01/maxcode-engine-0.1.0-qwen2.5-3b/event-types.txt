@@ -1,0 +1,8 @@
+thread.started
+item.completed error
+turn.started
+item.completed error
+item.started command_execution
+item.completed command_execution
+item.completed agent_message
+turn.completed

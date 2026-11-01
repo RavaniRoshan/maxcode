@@ -1,0 +1,21 @@
+[provider.pollinations]
+base_url    = "https://text.pollinations.ai/openai"
+api_key_env = "POLLINATIONS_KEY"
+
+[provider.local]
+base_url    = "http://127.0.0.1:11434/v1"
+api_key_env = "OLLAMA_API_KEY"
+
+[planner]
+provider = "pollinations"
+model    = "openai"
+
+[worker]
+provider = "local"
+model    = "qwen2.5:3b"
+
+[limits]
+max_retries_per_step  = 2
+max_cost_usd_per_task = 0.50
+max_diff_lines        = 400
+max_steps             = 2

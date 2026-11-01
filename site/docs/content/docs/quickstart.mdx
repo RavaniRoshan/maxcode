@@ -36,47 +36,54 @@ order.
 
 ## 3. Configure a local provider
 
-The repository ships a live-verified local configuration. Pull the worker model
-and create `maxcode.toml`:
+The live demo used a hosted planner and a local Ollama worker. Pull the worker
+model and create `maxcode.toml`:
 
 ```bash
-ollama pull llama3.2:3b
-export OLLAMA_API_KEY=local
+ollama pull qwen2.5:3b
+export POLLINATIONS_KEY=anonymous   # non-empty placeholder for the anonymous tier
+export OLLAMA_API_KEY=local         # Ollama ignores the value
 ```
 
 ```toml title="maxcode.toml"
+[provider.pollinations]
+base_url    = "https://text.pollinations.ai/openai"
+api_key_env = "POLLINATIONS_KEY"
+
 [provider.local]
 base_url    = "http://127.0.0.1:11434/v1"
 api_key_env = "OLLAMA_API_KEY"
 
 [planner]
-provider = "local"
-model    = "llama3.2:3b"
+provider = "pollinations"
+model    = "openai"          # the service's alias for gpt-oss-20b
 
 [worker]
 provider = "local"
-model    = "llama3.2:3b"
+model    = "qwen2.5:3b"
 
 [checks]
-test = "python -m pytest -q"
+test = "python3 -m pytest -q"
 ```
 
-A stronger planner such as `gpt-oss-20b` produces more reliable JSON plans.
-The planner must be able to follow the plan schema; a 1.5B planner produced weak
-plans in the benchmark.
+The planner must follow the JSON plan schema. Local 3B planners failed that
+schema or proposed editing tests on 2026-11-01; the probes are in
+`docs/BENCH.md`. The anonymous Pollinations tier is rate-limited and returned
+HTTP 400 on a larger repository. Use a funded planner if you need reliable plans
+at scale.
 
 ## 4. Run a task
 
 In a git repository with a failing test:
 
 ```bash
-maxcode run --yes "Edit app.py so add(a, b) returns a + b. Run python -m pytest -q. Do not change tests."
+maxcode run --yes --config maxcode.toml "Edit app.py so add(a, b) returns a + b. Run python3 -m pytest -q. Do not change tests."
 ```
 
 The run prints a summary like:
 
 ```text
-steps: 1/1  cost: $0.0000  tokens: 7182 in / 1067 out
+steps: 1/1  cost: $0.0000  tokens: 7393 in / 1293 out
 cost is partial: some calls lacked a price or a token count
 ```
 

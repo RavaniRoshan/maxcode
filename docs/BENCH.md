@@ -34,9 +34,16 @@ N = 3 per arm.
 **The score command is not passed to the worker.** `run_bench` passes only
 `task["task"]` to `run_task`; `_run_score` runs the separate `score` field after
 the loop (`src/maxcode/bench/runner.py`, `run_bench`). The engine session logs
-for the runs contain the task text but not the score string. The score commands
-for task-001/task-002 do not appear in
-`docs/bench/2026-10-31/verifier-off/task-*/engine-session.jsonl`.
+contain the task text, not the score command. The planner independently lists
+repo files in the worker prompt; in task-001 it listed `tests/test_basic.py`,
+a path the worker can also see by reading the repository. The full score
+command strings (`python -m pytest tests/test_basic.py -q` and
+`python -m pytest tests/ -q`) do not appear in any engine session under
+`docs/bench/2026-10-31/`.
+
+The score commands for task-001/task-002 do not appear in
+`docs/bench/2026-10-31/verifier-off/task-*/engine-session.jsonl`; the planner
+listed one repo path, not the command.
 
 The pinned repositories use a `src/` layout. The bench runner now adds
 `<repo>/src` to `PYTHONPATH` for the run and the score command; without that,
@@ -96,6 +103,31 @@ timeout.
 - **No funded providers.** OpenRouter, Hugging Face, and DeepSeek have no
   credential in this environment. Their exact errors are in `SPIKE.md` and
   `spike/`.
+
+## 2026-11-01 re-verification and fresh-run blocker
+
+The engine was re-verified on 2026-11-01 with `qwen2.5:3b` and `llama3.2:3b`;
+the full loop was re-verified with `qwen2.5:3b`. The logs are in `SPIKE.md` and
+`spike/*/reverify-2026-11-01/`. A fresh full-suite run could not start on the
+same day: the planner step below failed before `maxcode bench` could run a task.
+**No new score is published here.**
+
+| Planner | Probe result | Evidence |
+|---|---|---|
+| Pollinations `gpt-oss-20b` | HTTP 400 `output_token_limit_exceeded` on the click repository | `docs/bench/2026-11-01/planner-probes/pollinations-openai.*` |
+| Ollama `qwen2.5:3b` | invalid plan JSON after two attempts | `docs/bench/2026-11-01/planner-probes/qwen2.5-3b.*` |
+| Ollama `llama3.2:3b` | valid plan whose first step is "Add failing unit test" with `edits_tests: true`, which contradicts the task's "Do not weaken or delete tests" | `docs/bench/2026-11-01/planner-probes/llama3.2-3b.*` |
+| Ollama `qwen3:1.7b` | valid plan whose only step sets `edits_tests: true`, even though `max_steps` was 1 | `docs/bench/2026-11-01/planner-probes/qwen3-1.7b.*` |
+
+Every probe ran `maxcode plan` on a clean checkout of
+`pallets/click` at `2247b35ea1c47c727d7a06e51fa280e12a863ff6` with the task
+text "Ensure the project's test suite passes. Do not weaken or delete tests."
+The probe configs and stdout/stderr/exit-code files are committed.
+
+The 2026-10-31 result above stands: 3/3 in both arms, **0.0 percentage points**,
+with the verifier-on arm timing out before verification. It does not show a
+verifier advantage. The planner, not the verifier, is the weak link in this
+setup.
 
 ## Reproduce
 
