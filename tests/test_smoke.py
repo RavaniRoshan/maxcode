@@ -9,7 +9,7 @@ from maxcode.cli import app
 
 
 def test_package_imports() -> None:
-    assert maxcode.__version__ == "0.1.0"
+    assert maxcode.__version__ == "0.1.0-alpha.1"
 
 
 def test_cli_help() -> None:

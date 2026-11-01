@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.1.0-alpha.1 - 2026-11-01
+
 ### Added
 
 - Live evidence on local open-weight models: `qwen3:1.7b` and `llama3.2:3b`
@@ -12,6 +14,14 @@
   overrides for providers with different reasoning or context settings.
 - The benchmark runner puts a repository's `src/` on `PYTHONPATH`, so pinned
   src-layout projects can run their own tests and score commands.
+- Planner, worker, and verifier roles with a retry loop.
+- Git checkpoints under `refs/maxcode/` and the `undo` command.
+- OpenAI-compatible provider support.
+- Cost and token reporting, including partial results.
+- JSONL run logs.
+- Repository check detection for Python, Node, Rust, and Go.
+- Benchmark runner with 20 runs across four pinned Python projects and a report script.
+- Three-page static marketing site with the Max mascot.
 
 ### Changed
 
@@ -28,19 +38,6 @@
 
 - The TUI welcome animation no longer morphs an OpenAI logo.
 - Package metadata points at the correct GitHub repository.
-
-## 0.1.0 - 2026-10-29
-
-### Added
-
-- Planner, worker, and verifier roles with a retry loop.
-- Git checkpoints under `refs/maxcode/` and the `undo` command.
-- OpenAI-compatible provider support.
-- Cost and token reporting, including partial results.
-- JSONL run logs.
-- Repository check detection for Python, Node, Rust, and Go.
-- Benchmark runner with 20 runs across four pinned Python projects and a report script.
-- Three-page static marketing site with the Max mascot.
 
 ### Notes
 
