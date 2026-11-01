@@ -11,7 +11,7 @@ from pathlib import Path
 import pytest
 
 from maxcode.bench.report import summarize
-from maxcode.bench.runner import _repo_pythonpath, run_bench
+from maxcode.bench.runner import DEFAULT_SUITE, _load_tasks, _repo_pythonpath, run_bench
 from maxcode.config import Config
 from maxcode.schemas import RunResult, StopReason
 
@@ -235,3 +235,10 @@ def test_bench_worker_timeout_status_error(tmp_path: Path) -> None:
     assert row["baseline_status"] == "failed"
     assert row["score_passed"] == "True"
     assert row["status"] == "error"
+
+
+def test_default_suite_excludes_requests() -> None:
+    tasks = _load_tasks(DEFAULT_SUITE)
+    pinned = [task for task in tasks if task.get("repo_url")]
+    assert len(pinned) == 15
+    assert all("psf/requests" not in task["repo_url"] for task in pinned)

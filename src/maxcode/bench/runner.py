@@ -19,6 +19,11 @@ from maxcode.runlog import new_run_id
 from maxcode.schemas import RunOptions, StopReason
 
 DEFAULT_SUITE = Path(__file__).parent / "tasks"
+# psf/requests is excluded from the default suite: at commit
+# 3c7baaa05ab4aa49cc819ce3a819d260de19c157 it fails four tests on a clean
+# checkout (TestTimeout::test_connect_timeout and
+# TestTimeout::test_total_timeout_connect, two cases each). That baseline
+# failure is environmental, not a valid bug-fix task; see docs/BENCH.md.
 
 
 @dataclass
