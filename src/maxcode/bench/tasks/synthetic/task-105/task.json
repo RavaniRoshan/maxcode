@@ -1,0 +1,7 @@
+{
+  "id": "task-105",
+  "repo_dir": "repo",
+  "hidden_tests": "hidden",
+  "task": "Point scaling returns the wrong coordinates when the horizontal and vertical scales differ. Make the tests pass. Do not change the tests.",
+  "score": "cp -r \"$MAXCODE_HIDDEN_TESTS\" .bench_hidden && python -m pytest .bench_hidden -q; rc=$?; rm -rf .bench_hidden; exit $rc"
+}

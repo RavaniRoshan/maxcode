@@ -1,0 +1,7 @@
+{
+  "id": "task-102",
+  "repo_dir": "repo",
+  "hidden_tests": "hidden",
+  "task": "Pagination reports the wrong number of pages when the items divide evenly. Make the tests pass. Do not change the tests.",
+  "score": "cp -r \"$MAXCODE_HIDDEN_TESTS\" .bench_hidden && python -m pytest .bench_hidden -q; rc=$?; rm -rf .bench_hidden; exit $rc"
+}

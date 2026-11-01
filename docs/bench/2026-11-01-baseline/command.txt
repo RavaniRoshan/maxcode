@@ -1,0 +1,11 @@
+Date: 2026-11-01
+Purpose: baseline failures for the eight synthetic benchmark tasks.
+
+Command (run from the repository root):
+  uv run pytest -s tests/test_bench_tasks.py -k baseline \
+    > docs/bench/2026-11-01-baseline/pytest.txt
+
+Environment: local uv environment, no network, no API keys.
+The test materializes each task's repo, runs its visible tests, then copies
+the repo and runs the task's score command with the hidden tests. It asserts
+that both runs exit non-zero. `pytest.txt` is the captured output.

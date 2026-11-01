@@ -1,0 +1,424 @@
+=== task-101 visible (exit 1) ===
+F.                                                                       [100%]
+=================================== FAILURES ===================================
+____________________ test_large_order_gets_five_percent_off ____________________
+
+    def test_large_order_gets_five_percent_off() -> None:
+>       assert order_total([10.0, 10.0], 10) == 190.0
+E       assert 200.0 == 190.0
+E        +  where 200.0 = order_total([10.0, 10.0], 10)
+
+tests/test_discounts.py:5: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_discounts.py::test_large_order_gets_five_percent_off - asse...
+1 failed, 1 passed in 0.02s
+
+=== task-101 hidden score (exit 1) ===
+FF..F                                                                    [100%]
+=================================== FAILURES ===================================
+_____________________________ test_tier_boundaries _____________________________
+
+    def test_tier_boundaries() -> None:
+        assert discount_rate(9) == 0.0
+>       assert discount_rate(10) == 0.05
+E       assert 0.0 == 0.05
+E        +  where 0.0 = discount_rate(10)
+
+.bench_hidden/test_discounts_hidden.py:7: AssertionError
+______________________ test_tax_is_applied_after_discount ______________________
+
+    def test_tax_is_applied_after_discount() -> None:
+>       assert order_total([10.0], 10, tax_rate=0.1) == 104.5
+E       assert 110.0 == 104.5
+E        +  where 110.0 = order_total([10.0], 10, tax_rate=0.1)
+
+.bench_hidden/test_discounts_hidden.py:13: AssertionError
+________________________ test_description_uses_the_tier ________________________
+
+    def test_description_uses_the_tier() -> None:
+>       assert describe_discount(10) == "5% off"
+E       AssertionError: assert '0% off' == '5% off'
+E         
+E         - 5% off
+E         ? ^
+E         + 0% off
+E         ? ^
+
+.bench_hidden/test_discounts_hidden.py:26: AssertionError
+=========================== short test summary info ============================
+FAILED .bench_hidden/test_discounts_hidden.py::test_tier_boundaries - assert ...
+FAILED .bench_hidden/test_discounts_hidden.py::test_tax_is_applied_after_discount
+FAILED .bench_hidden/test_discounts_hidden.py::test_description_uses_the_tier
+3 failed, 2 passed in 0.02s
+
+=== task-102 visible (exit 1) ===
+FF                                                                       [100%]
+=================================== FAILURES ===================================
+____________________ test_exact_multiple_has_no_extra_page _____________________
+
+    def test_exact_multiple_has_no_extra_page() -> None:
+>       assert total_pages(20, 10) == 2
+E       assert 3 == 2
+E        +  where 3 = total_pages(20, 10)
+
+tests/test_pagination.py:5: AssertionError
+_________________________ test_empty_list_has_no_pages _________________________
+
+    def test_empty_list_has_no_pages() -> None:
+>       assert total_pages(0, 10) == 0
+E       assert 1 == 0
+E        +  where 1 = total_pages(0, 10)
+
+tests/test_pagination.py:9: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_pagination.py::test_exact_multiple_has_no_extra_page - asse...
+FAILED tests/test_pagination.py::test_empty_list_has_no_pages - assert 1 == 0
+2 failed in 0.02s
+
+=== task-102 hidden score (exit 1) ===
+..F...                                                                   [100%]
+=================================== FAILURES ===================================
+_____________________________ test_exact_multiple ______________________________
+
+    def test_exact_multiple() -> None:
+>       assert total_pages(100, 10) == 10
+E       assert 11 == 10
+E        +  where 11 = total_pages(100, 10)
+
+.bench_hidden/test_pagination_hidden.py:14: AssertionError
+=========================== short test summary info ============================
+FAILED .bench_hidden/test_pagination_hidden.py::test_exact_multiple - assert ...
+1 failed, 5 passed in 0.02s
+
+=== task-103 visible (exit 1) ===
+FF                                                                       [100%]
+=================================== FAILURES ===================================
+_______________________ test_withdrawal_reduces_balance ________________________
+
+    def test_withdrawal_reduces_balance() -> None:
+        account = Account(100.0)
+        account.withdraw(30.0)
+>       assert account.balance == 70.0
+E       assert 130.0 == 70.0
+E        +  where 130.0 = <bank.Account object at 0x7fb5136a1be0>.balance
+
+tests/test_bank.py:7: AssertionError
+_______________________ test_statement_after_withdrawal ________________________
+
+    def test_statement_after_withdrawal() -> None:
+        account = Account(100.0)
+        account.withdraw(30.0)
+>       assert account.statement() == "balance: 70.00"
+E       AssertionError: assert 'balance: 130.00' == 'balance: 70.00'
+E         
+E         - balance: 70.00
+E         ?          ^
+E         + balance: 130.00
+E         ?          ^^
+
+tests/test_bank.py:13: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_bank.py::test_withdrawal_reduces_balance - assert 130.0 == ...
+FAILED tests/test_bank.py::test_statement_after_withdrawal - AssertionError: ...
+2 failed in 0.02s
+
+=== task-103 hidden score (exit 1) ===
+FFF..                                                                    [100%]
+=================================== FAILURES ===================================
+________________________ test_exact_balance_withdrawal _________________________
+
+    def test_exact_balance_withdrawal() -> None:
+        account = Account(50.0)
+        account.withdraw(50.0)
+>       assert account.balance == 0.0
+E       assert 100.0 == 0.0
+E        +  where 100.0 = <bank.Account object at 0x70f82f0a1d30>.balance
+
+.bench_hidden/test_bank_hidden.py:8: AssertionError
+__________________________ test_multiple_withdrawals ___________________________
+
+    def test_multiple_withdrawals() -> None:
+        account = Account(100.0)
+        account.withdraw(10.0)
+        account.withdraw(20.0)
+>       assert account.balance == 70.0
+E       assert 130.0 == 70.0
+E        +  where 130.0 = <bank.Account object at 0x70f82f212e90>.balance
+
+.bench_hidden/test_bank_hidden.py:15: AssertionError
+__________________________ test_deposit_and_withdraw ___________________________
+
+    def test_deposit_and_withdraw() -> None:
+        account = Account(10.0)
+        account.deposit(40.0)
+        account.withdraw(25.0)
+>       assert account.balance == 25.0
+E       assert 75.0 == 25.0
+E        +  where 75.0 = <bank.Account object at 0x70f82f213610>.balance
+
+.bench_hidden/test_bank_hidden.py:22: AssertionError
+=========================== short test summary info ============================
+FAILED .bench_hidden/test_bank_hidden.py::test_exact_balance_withdrawal - ass...
+FAILED .bench_hidden/test_bank_hidden.py::test_multiple_withdrawals - assert ...
+FAILED .bench_hidden/test_bank_hidden.py::test_deposit_and_withdraw - assert ...
+3 failed, 2 passed in 0.02s
+
+=== task-104 visible (exit 1) ===
+F.                                                                       [100%]
+=================================== FAILURES ===================================
+______________________________ test_none_is_zero _______________________________
+
+    def test_none_is_zero() -> None:
+>       assert parse_duration(None) == 0
+               ^^^^^^^^^^^^^^^^^^^^
+
+tests/test_duration.py:5: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+text = None
+
+    def parse_duration(text: str | None) -> int:
+        """Return the duration in seconds. None or empty text is zero."""
+>       text = text.strip().lower()
+               ^^^^^^^^^^
+E       AttributeError: 'NoneType' object has no attribute 'strip'
+
+duration.py:10: AttributeError
+=========================== short test summary info ============================
+FAILED tests/test_duration.py::test_none_is_zero - AttributeError: 'NoneType'...
+1 failed, 1 passed in 0.02s
+
+=== task-104 hidden score (exit 1) ===
+F....                                                                    [100%]
+=================================== FAILURES ===================================
+______________________________ test_none_is_zero _______________________________
+
+    def test_none_is_zero() -> None:
+>       assert parse_duration(None) == 0
+               ^^^^^^^^^^^^^^^^^^^^
+
+.bench_hidden/test_duration_hidden.py:6: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+text = None
+
+    def parse_duration(text: str | None) -> int:
+        """Return the duration in seconds. None or empty text is zero."""
+>       text = text.strip().lower()
+               ^^^^^^^^^^
+E       AttributeError: 'NoneType' object has no attribute 'strip'
+
+duration.py:10: AttributeError
+=========================== short test summary info ============================
+FAILED .bench_hidden/test_duration_hidden.py::test_none_is_zero - AttributeEr...
+1 failed, 4 passed in 0.02s
+
+=== task-105 visible (exit 1) ===
+F.                                                                       [100%]
+=================================== FAILURES ===================================
+_______________________ test_non_square_scale_keeps_axes _______________________
+
+    def test_non_square_scale_keeps_axes() -> None:
+>       assert scale_shape([(2.0, 3.0)], 10.0, 100.0) == [(20.0, 300.0)]
+E       assert [(30.0, 200.0)] == [(20.0, 300.0)]
+E         
+E         At index 0 diff: (30.0, 200.0) != (20.0, 300.0)
+E         Use -v to get more diff
+
+tests/test_geometry.py:5: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_geometry.py::test_non_square_scale_keeps_axes - assert [(30...
+1 failed, 1 passed in 0.02s
+
+=== task-105 hidden score (exit 1) ===
+FF..                                                                     [100%]
+=================================== FAILURES ===================================
+_____________________________ test_multiple_points _____________________________
+
+    def test_multiple_points() -> None:
+>       assert scale_shape([(1.0, 2.0), (3.0, 4.0)], 2.0, 3.0) == [
+            (2.0, 6.0),
+            (6.0, 12.0),
+        ]
+E       assert [(4.0, 3.0), (8.0, 9.0)] == [(2.0, 6.0), (6.0, 12.0)]
+E         
+E         At index 0 diff: (4.0, 3.0) != (2.0, 6.0)
+E         Use -v to get more diff
+
+.bench_hidden/test_geometry_hidden.py:5: AssertionError
+_____________________________ test_negative_scale ______________________________
+
+    def test_negative_scale() -> None:
+>       assert scale_shape([(2.0, 3.0)], -1.0, 2.0) == [(-2.0, 6.0)]
+E       assert [(-3.0, 4.0)] == [(-2.0, 6.0)]
+E         
+E         At index 0 diff: (-3.0, 4.0) != (-2.0, 6.0)
+E         Use -v to get more diff
+
+.bench_hidden/test_geometry_hidden.py:12: AssertionError
+=========================== short test summary info ============================
+FAILED .bench_hidden/test_geometry_hidden.py::test_multiple_points - assert [...
+FAILED .bench_hidden/test_geometry_hidden.py::test_negative_scale - assert [(...
+2 failed, 2 passed in 0.02s
+
+=== task-106 visible (exit 1) ===
+F.F                                                                      [100%]
+=================================== FAILURES ===================================
+_______________________ test_threshold_is_not_a_reorder ________________________
+
+    def test_threshold_is_not_a_reorder() -> None:
+>       assert reorder_needed(5, 5) is False
+E       assert True is False
+E        +  where True = reorder_needed(5, 5)
+
+tests/test_inventory.py:5: AssertionError
+___________________ test_reorder_list_skips_threshold_items ____________________
+
+    def test_reorder_list_skips_threshold_items() -> None:
+        items = [Item("A", 5, 5), Item("B", 4, 5)]
+>       assert reorder_list(items) == ["B"]
+E       AssertionError: assert ['A', 'B'] == ['B']
+E         
+E         At index 0 diff: 'A' != 'B'
+E         Left contains one more item: 'B'
+E         Use -v to get more diff
+
+tests/test_inventory.py:14: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_inventory.py::test_threshold_is_not_a_reorder - assert True...
+FAILED tests/test_inventory.py::test_reorder_list_skips_threshold_items - Ass...
+2 failed, 1 passed in 0.02s
+
+=== task-106 hidden score (exit 1) ===
+F....                                                                    [100%]
+=================================== FAILURES ===================================
+_______________________ test_threshold_is_not_a_reorder ________________________
+
+    def test_threshold_is_not_a_reorder() -> None:
+>       assert reorder_list([Item("A", 5, 5)]) == []
+E       AssertionError: assert ['A'] == []
+E         
+E         Left contains one more item: 'A'
+E         Use -v to get more diff
+
+.bench_hidden/test_inventory_hidden.py:5: AssertionError
+=========================== short test summary info ============================
+FAILED .bench_hidden/test_inventory_hidden.py::test_threshold_is_not_a_reorder
+1 failed, 4 passed in 0.02s
+
+=== task-107 visible (exit 1) ===
+FF.                                                                      [100%]
+=================================== FAILURES ===================================
+_______________________ test_empty_text_has_zero_average _______________________
+
+    def test_empty_text_has_zero_average() -> None:
+>       assert average_word_length("") == 0.0
+               ^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_textstats.py:5: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+text = ''
+
+    def average_word_length(text: str) -> float:
+        """Return the average length of the words in the text."""
+        words = text.split()
+>       return sum(len(word) for word in words) / len(words)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       ZeroDivisionError: division by zero
+
+textstats.py:9: ZeroDivisionError
+____________________ test_whitespace_text_has_zero_average _____________________
+
+    def test_whitespace_text_has_zero_average() -> None:
+>       assert average_word_length("   ") == 0.0
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_textstats.py:9: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+text = '   '
+
+    def average_word_length(text: str) -> float:
+        """Return the average length of the words in the text."""
+        words = text.split()
+>       return sum(len(word) for word in words) / len(words)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       ZeroDivisionError: division by zero
+
+textstats.py:9: ZeroDivisionError
+=========================== short test summary info ============================
+FAILED tests/test_textstats.py::test_empty_text_has_zero_average - ZeroDivisi...
+FAILED tests/test_textstats.py::test_whitespace_text_has_zero_average - ZeroD...
+2 failed, 1 passed in 0.02s
+
+=== task-107 hidden score (exit 1) ===
+F....                                                                    [100%]
+=================================== FAILURES ===================================
+_______________________ test_empty_text_has_zero_average _______________________
+
+    def test_empty_text_has_zero_average() -> None:
+>       assert average_word_length("") == 0.0
+               ^^^^^^^^^^^^^^^^^^^^^^^
+
+.bench_hidden/test_textstats_hidden.py:5: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+text = ''
+
+    def average_word_length(text: str) -> float:
+        """Return the average length of the words in the text."""
+        words = text.split()
+>       return sum(len(word) for word in words) / len(words)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       ZeroDivisionError: division by zero
+
+textstats.py:9: ZeroDivisionError
+=========================== short test summary info ============================
+FAILED .bench_hidden/test_textstats_hidden.py::test_empty_text_has_zero_average
+1 failed, 4 passed in 0.02s
+
+=== task-108 visible (exit 1) ===
+FF                                                                       [100%]
+=================================== FAILURES ===================================
+____________________ test_touching_intervals_do_not_overlap ____________________
+
+    def test_touching_intervals_do_not_overlap() -> None:
+>       assert overlaps(9, 10, 10, 11) is False
+E       assert True is False
+E        +  where True = overlaps(9, 10, 10, 11)
+
+tests/test_scheduler.py:5: AssertionError
+____________________ test_touching_meetings_do_not_conflict ____________________
+
+    def test_touching_meetings_do_not_conflict() -> None:
+        meetings = [Meeting("A", 9, 10), Meeting("B", 10, 11)]
+>       assert conflicting_meetings(meetings) == []
+E       AssertionError: assert [('A', 'B')] == []
+E         
+E         Left contains one more item: ('A', 'B')
+E         Use -v to get more diff
+
+tests/test_scheduler.py:10: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_scheduler.py::test_touching_intervals_do_not_overlap - asse...
+FAILED tests/test_scheduler.py::test_touching_meetings_do_not_conflict - Asse...
+2 failed in 0.02s
+
+=== task-108 hidden score (exit 1) ===
+..F..                                                                    [100%]
+=================================== FAILURES ===================================
+_________________________ test_touching_is_not_overlap _________________________
+
+    def test_touching_is_not_overlap() -> None:
+>       assert overlaps(9, 10, 10, 11) is False
+E       assert True is False
+E        +  where True = overlaps(9, 10, 10, 11)
+
+.bench_hidden/test_scheduler_hidden.py:14: AssertionError
+=========================== short test summary info ============================
+FAILED .bench_hidden/test_scheduler_hidden.py::test_touching_is_not_overlap
+1 failed, 4 passed in 0.02s
+
+.
+1 passed, 1 deselected in 4.74s

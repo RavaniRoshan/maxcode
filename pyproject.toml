@@ -69,6 +69,8 @@ ignore = ["B008"]
 python_version = "3.12"
 strict = true
 files = ["src"]
+# Benchmark fixtures are intentionally broken; the benchmark tests catch the bug.
+exclude = ["^src/maxcode/bench/tasks/"]
 warn_unused_ignores = true
 
 [tool.pytest.ini_options]
