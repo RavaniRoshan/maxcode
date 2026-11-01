@@ -175,7 +175,13 @@ max_steps             = 12
 ollama pull qwen2.5:3b
 export POLLINATIONS_KEY=anonymous   # the anonymous tier needs a non-empty value
 export OLLAMA_API_KEY=local         # Ollama ignores the value
+export MAXCODE_REASONING_EFFORT=none
+export MAXCODE_MODEL_CONTEXT_WINDOW=16384
 ```
+
+Ollama 0.31.1 rejects a thinking request for `qwen2.5:3b` with
+`does not support thinking`, so the worker runs with reasoning off. Both
+variables are read by the engine adapter and are not stored anywhere.
 
 maxcode reads each key from the environment at run time. It never writes the key
 to a config file, a log, or a checkpoint. The OpenRouter example is not shown
@@ -241,9 +247,82 @@ TOML
 
 ollama pull qwen2.5:3b
 export POLLINATIONS_KEY=anonymous OLLAMA_API_KEY=local
+export MAXCODE_REASONING_EFFORT=none MAXCODE_MODEL_CONTEXT_WINDOW=16384
 
 maxcode run --yes --config maxcode.toml "Edit app.py so add(a, b) returns a + b. Use the exec_command tool to run sed -i 's/return a - b/return a + b/' app.py. Then run python3 -m pytest -q to confirm. Do not change tests."
 ```
+
+Recorded on 2026-11-01, unedited:
+[`docs/demo/demo.cast`](docs/demo/demo.cast) is the asciinema capture and
+[`docs/demo/run.jsonl`](docs/demo/run.jsonl) is the run log it wrote. **The demo
+prompt names the edit command, so it shows the plumbing and not bug-finding.**
+A prompt that only says "make the tests pass" makes the model choose the edit;
+[`docs/BENCH.md`](docs/BENCH.md) records how that went.
+
+<details>
+<summary>Terminal transcript, rendered from the cast</summary>
+
+```text
+$ mkdir demo && cd demo
+$ git init -b main
+Initialized empty Git repository in /home/shiva/maxcode-demo-aCjZXg/demo/.git/
+$ mkdir tests
+$ cat > app.py <<'PY'
+> def add(a, b):
+>     return a - b
+> PY
+$ cat > tests/test_app.py <<'PY'
+> from app import add
+>
+> def test_add():
+>     assert add(2, 3) == 5
+> PY
+$ cat > maxcode.toml <<'TOML'
+> [provider.pollinations]
+> base_url    = "https://text.pollinations.ai/openai"
+> api_key_env = "POLLINATIONS_KEY"
+>
+> [provider.local]
+> base_url    = "http://127.0.0.1:11434/v1"
+> api_key_env = "OLLAMA_API_KEY"
+>
+> [planner]
+> provider = "pollinations"
+> model    = "openai"
+>
+> [worker]
+> provider = "local"
+> model    = "qwen2.5:3b"
+>
+> [limits]
+> max_retries_per_step  = 2
+> max_cost_usd_per_task = 0.50
+> max_diff_lines        = 200
+> max_steps             = 1
+>
+> [checks]
+> test = "python3 -m pytest -q"
+> TOML
+$ ollama pull qwen2.5:3b
+pulling manifest
+pulling 5ee4f07cdb9b: 100% ▕██████████████████████████████████████▏ 1.9 GB
+pulling 66b9ea09bd5b: 100% ▕██████████████████████████████████████▏   68 B
+pulling eb4402837c78: 100% ▕██████████████████████████████████████▏ 1.5 KB
+pulling b5c0e5cf74cf: 100% ▕██████████████████████████████████████▏ 7.4 KB
+pulling 161ddde4c9cd: 100% ▕██████████████████████████████████████▏  487 B
+verifying sha256 digest
+writing manifest
+success
+$ export POLLINATIONS_KEY=anonymous OLLAMA_API_KEY=local
+$ export MAXCODE_REASONING_EFFORT=none MAXCODE_MODEL_CONTEXT_WINDOW=16384
+$ maxcode run --yes --config maxcode.toml "Edit app.py so add(a, b) returns a + b. Use the exec_command tool to run sed -i 's/return a - b/return a + b/' app.py. Then run python3 -m pytest -q to confirm. Do not change tests."
+steps: 1/1  cost: $0.0000  tokens: 7442 in / 754 out
+cost is partial: some calls lacked a price or a token count
+$ exit
+exit
+```
+
+</details>
 
 Exit code `0` means the verifier passed. Anything else means the work is not
 done. If a step exhausts its retries, the run stops at the last checkpoint:

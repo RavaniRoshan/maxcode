@@ -1,0 +1,57 @@
+$ mkdir demo && cd demo
+$ git init -b main
+Initialized empty Git repository in /home/shiva/maxcode-demo-aCjZXg/demo/.git/
+$ mkdir tests
+$ cat > app.py <<'PY'
+> def add(a, b):
+>     return a - b
+> PY
+$ cat > tests/test_app.py <<'PY'
+> from app import add
+>
+> def test_add():
+>     assert add(2, 3) == 5
+> PY
+$ cat > maxcode.toml <<'TOML'
+> [provider.pollinations]
+> base_url    = "https://text.pollinations.ai/openai"
+> api_key_env = "POLLINATIONS_KEY"
+>
+> [provider.local]
+> base_url    = "http://127.0.0.1:11434/v1"
+> api_key_env = "OLLAMA_API_KEY"
+>
+> [planner]
+> provider = "pollinations"
+> model    = "openai"
+>
+> [worker]
+> provider = "local"
+> model    = "qwen2.5:3b"
+>
+> [limits]
+> max_retries_per_step  = 2
+> max_cost_usd_per_task = 0.50
+> max_diff_lines        = 200
+> max_steps             = 1
+>
+> [checks]
+> test = "python3 -m pytest -q"
+> TOML
+$ ollama pull qwen2.5:3b
+pulling manifest
+pulling 5ee4f07cdb9b: 100% ▕██████████████████████████████████████▏ 1.9 GB
+pulling 66b9ea09bd5b: 100% ▕██████████████████████████████████████▏   68 B
+pulling eb4402837c78: 100% ▕██████████████████████████████████████▏ 1.5 KB
+pulling b5c0e5cf74cf: 100% ▕██████████████████████████████████████▏ 7.4 KB
+pulling 161ddde4c9cd: 100% ▕██████████████████████████████████████▏  487 B
+verifying sha256 digest
+writing manifest
+success
+$ export POLLINATIONS_KEY=anonymous OLLAMA_API_KEY=local
+$ export MAXCODE_REASONING_EFFORT=none MAXCODE_MODEL_CONTEXT_WINDOW=16384
+$ maxcode run --yes --config maxcode.toml "Edit app.py so add(a, b) returns a + b. Use the exec_command tool to run sed -i 's/return a - b/return a + b/' app.py. Then run python3 -m pytest -q to confirm. Do not change tests."
+steps: 1/1  cost: $0.0000  tokens: 7442 in / 754 out
+cost is partial: some calls lacked a price or a token count
+$ exit
+exit
