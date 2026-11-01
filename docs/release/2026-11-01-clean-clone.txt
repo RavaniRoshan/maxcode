@@ -1,0 +1,144 @@
+# Clean-clone check, 2026-11-01
+
+Repository head: 5c3d29c (local clone; the release branch is not pushed yet)
+uv: uv 0.12.22 (x86_64-unknown-linux-gnu)
+Python: Python 3.13.16
+Node: v24.21.0, npm: 11.19.0
+Ollama: ollama version is 0.31.1
+
+Every command below is copied from README.md and run in that clean clone.
+
+## Install: the CLI
+
+$ uv sync
+exit=0
+
+$ uv run maxcode --help
+                                                                                
+ Usage: maxcode [OPTIONS] COMMAND [ARGS]...                                     
+                                                                                
+ Plan a task, edit code, and finish only when checks pass.                      
+                                                                                
+╭─ Options ────────────────────────────────────────────────────────────────────╮
+│ --install-completion          Install completion for the current shell.      │
+│ --show-completion             Show completion for the current shell, to copy │
+│                               it or customize the installation.              │
+│ --help                        Show this message and exit.                    │
+╰──────────────────────────────────────────────────────────────────────────────╯
+╭─ Commands ───────────────────────────────────────────────────────────────────╮
+│ run      Plan, edit, and verify a task.                                      │
+│ plan     Show a plan without running it.                                     │
+│ undo     Restore the last checkpoint.                                        │
+│ cost     Show the cost of a run.                                             │
+│ bench    Run the benchmark suite.                                            │
+│ version  Show the installed version.                                         │
+│ doctor   Check git, the engine, the config, the endpoints, and the checks.   │
+╰──────────────────────────────────────────────────────────────────────────────╯
+
+exit=0
+
+$ uvx --from git+https://github.com/RavaniRoshan/maxcode maxcode --help
+exit=0
+│ version  Show the installed version.                                         │
+╰──────────────────────────────────────────────────────────────────────────────╯
+
+
+Note: this installs the current remote `main`, which predates this branch.
+
+## Install: the engine
+
+$ npm install --prefix /tmp/codex0165c @openai/codex@0.165.0
+(the README line uses -g; a global install was not run on this machine)
+added 2 packages
+
+$ /tmp/codex0165c/node_modules/.bin/codex --version
+codex-cli 0.165.0
+exit=0
+
+$ codex --version   # the global install on this machine
+codex-cli 0.163.0
+exit=0
+
+The global binary is 0.163.0, below the 0.165.0 the adapter requires, so the
+demo used MAXCODE_ENGINE_BIN to select the 0.165.0 binary from the prefix.
+
+Fork build lines: not run. The fork checkout exists outside this clone;
+cargo is installed, and maxcode-rs/cli/Cargo.toml declares package
+`maxcode-cli` with bin `maxcode-engine`, and maxcode-rs/Cargo.toml declares
+[profile.dev-small].
+
+## Configure
+
+$ ollama pull qwen2.5:3b
+exit=0
+writing manifest [K
+success [K[?25h[?2026l
+
+## Dev commands
+
+$ uv run pytest -m "not slow"
+
+====================== 166 passed, 1 deselected in 8.39s =======================
+exit=0
+
+$ uv run ruff check .
+All checks passed!
+exit=0
+
+$ uv run mypy src
+Success: no issues found in 22 source files
+exit=0
+
+## Benchmark
+
+First attempt, before the README fix, with no maxcode.toml:
+
+$ maxcode bench --verifier on --suite docs/bench/2026-10-31/suite3
+No maxcode.toml file found.
+Why: Looked for .../maxcode/maxcode.toml and ~/.config/maxcode/maxcode.toml.
+Next: Create maxcode.toml in the repository root; see README.md for an example.
+exit=2
+
+Second attempt, after copying the committed config:
+
+$ cp docs/bench/2026-10-31/maxcode.toml .
+$ maxcode bench --verifier on --suite docs/bench/2026-10-31/suite3
+tasks: 0/1  invalid: 2  errors: 1  cost: $0.0000 exit=0 
+The suite reported two invalid tasks and one error. The report below lists
+task-001 and task-003 as "excluded from N (baseline passed)", so no task
+produced a score. This is the gating and planner behaviour docs/BENCH.md
+records, not a new benchmark result.
+
+$ uv run python -m maxcode.bench.report .maxcode/bench
+| verifier | tasks | pass rate | cost per completed task | unverified |
+|---|---:|---:|---:|---:|
+| on | 1 | 0.0% | $0.0000 | 0 |
+
+Excluded from N (baseline passed):
+- task-001: baseline passed
+- task-003: baseline passed
+exit=0
+
+## Demo
+
+The demo run was recorded on a separate checkout; the cast, transcript, and
+run log are in docs/demo/. Repeating its last command from the README:
+
+$ maxcode undo
+Restored refs/maxcode/20261101T135535-ef7ed7/1.
+exit=0
+
+After the undo, app.py was back to `return a - b`.
+
+## Result
+
+Two README problems were found and fixed:
+
+- the Demo block never exported MAXCODE_REASONING_EFFORT=none, so Ollama
+  answered "qwen2.5:3b does not support thinking" and the run stopped with
+  `stopped: error`;
+- the Benchmark block did not copy a maxcode.toml, so maxcode bench exited 2
+  with "No maxcode.toml file found" on a clean clone.
+
+The fork build lines and the global npm install were not executed; see the
+notes above for what was checked instead.

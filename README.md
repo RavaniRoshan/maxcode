@@ -434,10 +434,16 @@ No new score is published. Read [`docs/BENCH.md`](docs/BENCH.md) for every
 failure and the blocker.
 
 ```bash
+cp docs/bench/2026-10-31/maxcode.toml .   # the config the published run used
 maxcode bench --verifier on  --suite docs/bench/2026-10-31/suite3
 maxcode bench --verifier off --suite docs/bench/2026-10-31/suite3
 uv run python -m maxcode.bench.report .maxcode/bench
 ```
+
+`maxcode bench` reads `maxcode.toml` from the repository root, so the config is
+copied there first. The suite clones each pinned repository and runs its own
+tests; a task whose dependencies cannot be installed is counted as `invalid`,
+not as a pass.
 
 The default suite is four pinned Python projects repeated five times each; the
 published run used a 3-task subset and says so. A published score must link to
@@ -492,7 +498,8 @@ It is not a dependable worker; see [`SPIKE.md`](SPIKE.md).
 
 **Mock/offline-verified:**
 
-- the full CLI state machine and 117 offline tests;
+- the full CLI state machine and 166 offline tests
+  ([`docs/release/2026-11-01-checks.txt`](docs/release/2026-11-01-checks.txt));
 - the generic OpenAI-compatible chat shape, with a mock HTTP transport. No
   provider-specific OpenRouter, Hugging Face, or DeepSeek wire shape was tested.
 
