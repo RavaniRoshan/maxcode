@@ -303,6 +303,26 @@ maxcode detects the project type and runs the checks it finds:
 You can add or override checks in `maxcode.toml`. Checks run with a timeout and
 their full output is kept in the run log, so a failure is reproducible.
 
+## Troubleshooting
+
+Run `maxcode doctor` first. It checks git, the engine, the config, and both
+provider endpoints, and prints a one-line fix for every failure.
+
+The planner needs an OpenAI-compatible `/chat/completions` endpoint. The
+worker needs a Responses API `/responses` endpoint. One provider must offer
+both, or configure the planner and worker with two providers:
+
+```toml
+[planner]
+provider = "planner-provider"
+
+[worker]
+provider = "worker-provider"
+```
+
+`maxcode doctor` names a missing environment variable and never prints the
+key.
+
 ## Benchmark
 
 The repository ships a benchmark harness, not a leaderboard. It runs the same
