@@ -11,6 +11,7 @@ from typing import Any
 
 from maxcode.checkpoints import create, is_git_repo, repo_head, restore
 from maxcode.checks import (
+    available_check_commands,
     available_check_names,
     detect_checks,
     verify_step,
@@ -141,6 +142,7 @@ def run_task(
 
     detected = detect_checks(root)
     available = available_check_names(cfg, detected)
+    available_commands = available_check_commands(cfg, detected)
 
     if provider is None and deps is None:
         pcfg = cfg.provider[cfg.planner.provider]
@@ -159,6 +161,7 @@ def run_task(
                 plan_provider,
                 usage_sink=meter.add,
                 available_checks=available,
+                available_commands=available_commands,
             )
 
         def work(step: Any, failure: str | None) -> Any:

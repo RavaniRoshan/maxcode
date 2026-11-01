@@ -6,6 +6,7 @@ import json
 from pathlib import Path
 
 from maxcode.checks import (
+    available_check_commands,
     available_check_names,
     detect_checks,
     resolve_checks,
@@ -150,3 +151,8 @@ def test_resolve_checks_keeps_cmd_checks_and_deduplicates() -> None:
 def test_available_check_names_include_overrides_and_detected() -> None:
     cfg = make_config({"build": "make"})
     assert available_check_names(cfg, {"test": "pytest"}) == ["test", "build"]
+
+
+def test_available_check_commands_include_overrides_and_detected() -> None:
+    cfg = make_config({"build": "make"})
+    assert available_check_commands(cfg, {"test": "pytest"}) == ["pytest", "make"]

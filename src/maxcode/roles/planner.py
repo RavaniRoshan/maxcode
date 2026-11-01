@@ -75,14 +75,10 @@ def _parse_plan(text: str) -> Plan:
 def validate_plan_checks(plan: Plan, available: Sequence[str]) -> None:
     """Reject checks that the repository does not offer."""
     allowed = set(available)
-    allow_cmd = "cmd:<command>" in allowed
     errors: list[str] = []
     for step in plan.steps:
         for check in step.checks:
-            if check.startswith("cmd:"):
-                if not allow_cmd:
-                    errors.append(f"step {step.id}: command checks are not available")
-            elif check not in allowed:
+            if check not in allowed:
                 errors.append(f"step {step.id}: check '{check}' is not available")
     if errors:
         raise ValueError("; ".join(errors))
@@ -101,13 +97,18 @@ class Planner:
         self._cfg = cfg
         self._usage_sink = usage_sink
 
-    def _available(self, detected: Sequence[str] | None) -> list[str]:
+    def _available(
+        self,
+        detected: Sequence[str] | None,
+        commands: Sequence[str] | None,
+    ) -> list[str]:
         if detected is None:
             names = [name for name in NAMED_CHECKS if getattr(self._cfg.checks, name)]
             names = names or list(NAMED_CHECKS)
         else:
             names = list(detected)
-        return [*dict.fromkeys([*names, "cmd:<command>"])]
+        entries = [*names, *(f"cmd:{command}" for command in commands or [])]
+        return list(dict.fromkeys(entries))
 
     def make_plan(
         self,
@@ -115,9 +116,10 @@ class Planner:
         repo_summary: str,
         *,
         available_checks: Sequence[str] | None = None,
+        available_commands: Sequence[str] | None = None,
     ) -> Plan:
         """Call the provider and retry once when the plan is invalid."""
-        available = self._available(available_checks)
+        available = self._available(available_checks, available_commands)
         prompt = build_plan_prompt(
             task=task,
             repo_summary=repo_summary,
@@ -168,6 +170,7 @@ def make_plan(
     *,
     usage_sink: UsageSink | None = None,
     available_checks: Sequence[str] | None = None,
+    available_commands: Sequence[str] | None = None,
 ) -> Plan:
     """Public planner entry point. Builds a provider when none is supplied."""
     owned = provider is None
@@ -178,7 +181,12 @@ def make_plan(
         )
     try:
         planner = Planner(provider, cfg, usage_sink)
-        return planner.make_plan(task, repo_summary, available_checks=available_checks)
+        return planner.make_plan(
+            task,
+            repo_summary,
+            available_checks=available_checks,
+            available_commands=available_commands,
+        )
     finally:
         if owned:
             provider.close()

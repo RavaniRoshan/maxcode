@@ -133,16 +133,28 @@ def plan(
     cfg = _load_config(config)
     root = Path.cwd()
     _require_git(root)
-    from maxcode.checks import available_check_names, detect_checks
+    from maxcode.checks import (
+        available_check_commands,
+        available_check_names,
+        detect_checks,
+    )
 
     detected = detect_checks(root)
     available = available_check_names(cfg, detected)
+    available_commands = available_check_commands(cfg, detected)
     pcfg = cfg.provider[cfg.planner.provider]
     from maxcode.providers.openai_compat import OpenAICompatProvider
 
     provider = OpenAICompatProvider(pcfg.base_url, cfg.api_key_for(cfg.planner.provider))
     try:
-        planned = make_plan(task, _repo_summary(root), cfg, provider, available_checks=available)
+        planned = make_plan(
+            task,
+            _repo_summary(root),
+            cfg,
+            provider,
+            available_checks=available,
+            available_commands=available_commands,
+        )
     except MaxcodeError as error:
         _print_error(error)
         raise typer.Exit(code=_exit_code_for(error)) from error

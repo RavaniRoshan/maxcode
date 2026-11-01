@@ -199,7 +199,7 @@ def test_unavailable_check_retries_with_valid_checks() -> None:
     assert len(provider.calls) == 2
     retry = provider.calls[1][0][-1]["content"]
     assert "check 'build' is not available" in retry
-    assert "Valid checks: test, cmd:<command>" in retry
+    assert "Valid checks: test" in retry
 
 
 def test_unavailable_check_twice_raises_plan_error() -> None:
@@ -221,7 +221,7 @@ def test_unavailable_check_twice_raises_plan_error() -> None:
         make_plan("task", "summary", CFG, provider, available_checks=["test"])
     message = str(excinfo.value)
     assert "lint" in message
-    assert "Valid checks: test, cmd:<command>" in message
+    assert "Valid checks: test" in message
     assert len(provider.calls) == 2
 
 
@@ -245,4 +245,56 @@ def test_schema_rejects_invented_named_check_then_retries() -> None:
     assert len(provider.calls) == 2
     retry = provider.calls[1][0][-1]["content"]
     assert "flake8" in retry
-    assert "Valid checks: test, cmd:<command>" in retry
+    assert "Valid checks: test" in retry
+
+
+def test_configured_cmd_check_is_allowed() -> None:
+    provider = FakeProvider(
+        [
+            ChatResult(
+                text=json.dumps(plan_with_checks(["cmd:python -m pytest -q"])),
+                input_tokens=1,
+                output_tokens=1,
+            )
+        ]
+    )
+    plan = make_plan(
+        "task",
+        "summary",
+        CFG,
+        provider,
+        available_checks=["test"],
+        available_commands=["python -m pytest -q"],
+    )
+    assert plan.steps[0].checks == ["cmd:python -m pytest -q"]
+    assert len(provider.calls) == 1
+
+
+def test_unconfigured_cmd_check_retries_with_valid_commands() -> None:
+    provider = FakeProvider(
+        [
+            ChatResult(
+                text=json.dumps(plan_with_checks(["cmd:flake8 ."])),
+                input_tokens=1,
+                output_tokens=1,
+            ),
+            ChatResult(
+                text=json.dumps(plan_with_checks(["test"])),
+                input_tokens=1,
+                output_tokens=1,
+            ),
+        ]
+    )
+    plan = make_plan(
+        "task",
+        "summary",
+        CFG,
+        provider,
+        available_checks=["test"],
+        available_commands=["python -m pytest -q"],
+    )
+    assert plan.steps[0].checks == ["test"]
+    assert len(provider.calls) == 2
+    retry = provider.calls[1][0][-1]["content"]
+    assert "cmd:flake8 ." in retry
+    assert "Valid checks: test, cmd:python -m pytest -q" in retry

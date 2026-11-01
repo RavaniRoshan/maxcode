@@ -117,6 +117,12 @@ def available_check_names(cfg: Config, detected: dict[str, str]) -> list[str]:
     ]
 
 
+def available_check_commands(cfg: Config, detected: dict[str, str]) -> list[str]:
+    """Return configured and detected commands for cmd: checks."""
+    commands = [*detected.values(), cfg.checks.test, cfg.checks.build, cfg.checks.lint]
+    return [command for command in dict.fromkeys(commands) if command]
+
+
 def resolve_checks(
     requested: Iterable[str], cfg: Config, detected: dict[str, str]
 ) -> list[tuple[str, str]]:
