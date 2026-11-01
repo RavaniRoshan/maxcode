@@ -78,6 +78,8 @@ def _print_run_result(result: Any) -> None:
         typer.echo("unverified: " + ", ".join(str(item) for item in result.unverified_steps))
     if result.stop_reason is not None:
         typer.echo(f"stopped: {result.stop_reason}")
+    if result.error:
+        typer.echo(result.error)
     if result.exit_code != 0:
         typer.echo("run 'maxcode undo' to restore the last checkpoint")
 

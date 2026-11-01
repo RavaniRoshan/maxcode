@@ -162,3 +162,87 @@ def test_empty_steps_are_rejected() -> None:
     )
     with pytest.raises(PlanError):
         make_plan("task", "summary", CFG, provider)
+
+
+def plan_with_checks(checks: list[str]) -> dict:
+    return {
+        "task": "fix the bug",
+        "steps": [
+            {
+                "id": 1,
+                "goal": "fix it",
+                "files": ["app.py"],
+                "checks": checks,
+                "edits_tests": False,
+            }
+        ],
+    }
+
+
+def test_unavailable_check_retries_with_valid_checks() -> None:
+    provider = FakeProvider(
+        [
+            ChatResult(
+                text=json.dumps(plan_with_checks(["build"])),
+                input_tokens=1,
+                output_tokens=1,
+            ),
+            ChatResult(
+                text=json.dumps(plan_with_checks(["test"])),
+                input_tokens=1,
+                output_tokens=1,
+            ),
+        ]
+    )
+    plan = make_plan("task", "summary", CFG, provider, available_checks=["test"])
+    assert plan.steps[0].checks == ["test"]
+    assert len(provider.calls) == 2
+    retry = provider.calls[1][0][-1]["content"]
+    assert "check 'build' is not available" in retry
+    assert "Valid checks: test, cmd:<command>" in retry
+
+
+def test_unavailable_check_twice_raises_plan_error() -> None:
+    provider = FakeProvider(
+        [
+            ChatResult(
+                text=json.dumps(plan_with_checks(["lint"])),
+                input_tokens=1,
+                output_tokens=1,
+            ),
+            ChatResult(
+                text=json.dumps(plan_with_checks(["lint"])),
+                input_tokens=1,
+                output_tokens=1,
+            ),
+        ]
+    )
+    with pytest.raises(PlanError) as excinfo:
+        make_plan("task", "summary", CFG, provider, available_checks=["test"])
+    message = str(excinfo.value)
+    assert "lint" in message
+    assert "Valid checks: test, cmd:<command>" in message
+    assert len(provider.calls) == 2
+
+
+def test_schema_rejects_invented_named_check_then_retries() -> None:
+    provider = FakeProvider(
+        [
+            ChatResult(
+                text=json.dumps(plan_with_checks(["flake8"])),
+                input_tokens=1,
+                output_tokens=1,
+            ),
+            ChatResult(
+                text=json.dumps(plan_with_checks(["test"])),
+                input_tokens=1,
+                output_tokens=1,
+            ),
+        ]
+    )
+    plan = make_plan("task", "summary", CFG, provider, available_checks=["test"])
+    assert plan.steps[0].checks == ["test"]
+    assert len(provider.calls) == 2
+    retry = provider.calls[1][0][-1]["content"]
+    assert "flake8" in retry
+    assert "Valid checks: test, cmd:<command>" in retry

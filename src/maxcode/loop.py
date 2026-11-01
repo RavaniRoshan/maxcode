@@ -35,10 +35,13 @@ SKIP_DIRS = frozenset({".git", ".venv", "node_modules", ".maxcode", "__pycache__
 class _Stop(Exception):
     """Internal control-flow exception for a clean stop."""
 
-    def __init__(self, reason: StopReason, exit_code: int, restore_ref: str | None = None) -> None:
+    def __init__(
+        self, reason: StopReason, exit_code: int, restore_ref: str | None = None, error: str = ""
+    ) -> None:
         self.reason = reason
         self.exit_code = exit_code
         self.restore_ref = restore_ref
+        self.error = error
 
 
 @dataclass
@@ -200,6 +203,7 @@ def run_task(
     current_ref: str | None = None
     stop_reason: StopReason | None = None
     exit_code = 0
+    stop_error = ""
     current_plan: Plan | None = None
 
     try:
@@ -212,7 +216,7 @@ def run_task(
         try:
             current_plan = deps.plan(task, deps.repo_summary())
         except PlanError as exc:
-            raise _Stop(StopReason.ERROR, 3) from exc
+            raise _Stop(StopReason.ERROR, 3, error=str(exc)) from exc
 
         if meter.cap_reached:
             raise _Stop(StopReason.COST_CAP, 1)
@@ -341,6 +345,7 @@ def run_task(
     except _Stop as stop:
         stop_reason = stop.reason
         exit_code = stop.exit_code
+        stop_error = stop.error
         if stop.restore_ref is not None:
             with contextlib.suppress(Exception):
                 deps.checkpoint_restore(stop.restore_ref)
@@ -353,9 +358,6 @@ def run_task(
         if current_ref is not None:
             with contextlib.suppress(Exception):
                 deps.checkpoint_restore(current_ref)
-
-    if stop_reason is None:
-        stop_reason = None
 
     passed = stop_reason is None and not unverified_steps and steps_done == total_steps
     if exit_code == 0 and unverified_steps:
@@ -388,5 +390,6 @@ def run_task(
         tokens_out=meter.tokens_out,
         partial=meter.partial,
         stop_reason=stop_reason,
+        error=stop_error,
         log_path=str(runlog.path),
     )

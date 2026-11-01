@@ -174,6 +174,7 @@ def test_plan_invalid_twice_exits_3(tmp_path: Path) -> None:
     )
     assert result.exit_code == 3
     assert result.stop_reason == "error"
+    assert "x" in result.error
 
 
 def test_review_rejected_exits_130(tmp_path: Path) -> None:

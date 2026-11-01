@@ -134,6 +134,7 @@ class RunResult(BaseModel):
     tokens_out: int = 0
     partial: bool = False
     stop_reason: StopReason | None = None
+    error: str = ""
     log_path: str = ""
 
 

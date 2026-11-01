@@ -61,10 +61,31 @@ def _strip_fences(text: str) -> str:
 
 def _parse_plan(text: str) -> Plan:
     try:
-        return Plan.model_validate(json.loads(_strip_fences(text)))
-    except (json.JSONDecodeError, ValidationError) as exc:
-        detail = str(exc).strip().splitlines()[0][:500]
-        raise ValueError(f"invalid plan JSON: {detail}") from exc
+        data = json.loads(_strip_fences(text))
+    except json.JSONDecodeError as exc:
+        raise ValueError(f"invalid plan JSON: {exc}") from exc
+    try:
+        return Plan.model_validate(data)
+    except ValidationError as exc:
+        first = exc.errors()[0]
+        location = ".".join(str(part) for part in first["loc"]) or "plan"
+        raise ValueError(f"invalid plan JSON: {location}: {first['msg']}") from exc
+
+
+def validate_plan_checks(plan: Plan, available: Sequence[str]) -> None:
+    """Reject checks that the repository does not offer."""
+    allowed = set(available)
+    allow_cmd = "cmd:<command>" in allowed
+    errors: list[str] = []
+    for step in plan.steps:
+        for check in step.checks:
+            if check.startswith("cmd:"):
+                if not allow_cmd:
+                    errors.append(f"step {step.id}: command checks are not available")
+            elif check not in allowed:
+                errors.append(f"step {step.id}: check '{check}' is not available")
+    if errors:
+        raise ValueError("; ".join(errors))
 
 
 class Planner:
@@ -95,21 +116,25 @@ class Planner:
         *,
         available_checks: Sequence[str] | None = None,
     ) -> Plan:
-        """Call the provider and retry once when the JSON is invalid."""
+        """Call the provider and retry once when the plan is invalid."""
+        available = self._available(available_checks)
         prompt = build_plan_prompt(
             task=task,
             repo_summary=repo_summary,
             max_steps=self._cfg.limits.max_steps,
-            available_checks=self._available(available_checks),
+            available_checks=available,
             schema=Plan.model_json_schema(),
         )
         messages: list[ChatMessage] = [{"role": "user", "content": prompt}]
+        valid = ", ".join(available)
         last_error = ""
         for attempt in range(2):
             result = self._provider.chat(messages, self._cfg.planner.model)
             self._report(result)
             try:
-                return _parse_plan(result.text)
+                plan = _parse_plan(result.text)
+                validate_plan_checks(plan, available)
+                return plan
             except ValueError as exc:
                 last_error = str(exc)
                 if attempt == 0:
@@ -119,14 +144,15 @@ class Planner:
                             "role": "user",
                             "content": (
                                 f"Your output was invalid: {last_error}\n"
+                                f"Valid checks: {valid}\n"
                                 "Output the JSON only."
                             ),
                         }
                     )
         raise PlanError(
             "The planner did not return a valid plan after two attempts.",
-            f"Last error: {last_error}",
-            "Check the planner model and provider, then run the task again.",
+            f"Last error: {last_error}. Valid checks: {valid}",
+            "Fix the planner prompt or model, then run the task again.",
         )
 
     def _report(self, result: ChatResult) -> None:

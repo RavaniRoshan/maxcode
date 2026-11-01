@@ -244,3 +244,25 @@ def test_cost_partial_word(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> N
     result = runner.invoke(app, ["cost"])
     assert result.exit_code == 0
     assert "partial" in result.output.lower()
+
+
+def test_run_prints_plan_error(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    init_repo(tmp_path)
+    monkeypatch.setattr("maxcode.cli.load_config", lambda path=None: fake_config())
+    monkeypatch.setattr(
+        "maxcode.cli.run_task",
+        lambda *a, **k: RunResult(
+            run_id="r",
+            passed=False,
+            exit_code=3,
+            error=(
+                "The planner did not return a valid plan.\n"
+                "Why: unknown check\n"
+                "Next: fix it"
+            ),
+        ),
+    )
+    result = runner.invoke(app, ["run", "task", "--yes"])
+    assert result.exit_code == 3
+    assert "The planner did not return a valid plan." in result.output
