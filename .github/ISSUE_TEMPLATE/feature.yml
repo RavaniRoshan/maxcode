@@ -1,0 +1,54 @@
+name: Feature request
+description: Ask for a capability maxcode does not have yet.
+title: "[feature]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        maxcode adds one capability only when another is removed, so say what
+        this replaces or why it belongs in the core loop.
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem does this solve?
+      description: Describe the work that is hard today, not the implementation you have in mind.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: What should maxcode do?
+      description: The command, config key, or behaviour you expect.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: What did you try instead?
+      description: A workaround, another tool, or a shell script.
+  - type: dropdown
+    id: scope
+    attributes:
+      label: Which part of the loop does this touch?
+      options:
+        - Planner
+        - Worker
+        - Verifier and checks
+        - Checkpoints and undo
+        - Cost and run logs
+        - Providers and engine
+        - Benchmark
+        - Command line and config
+        - Documentation
+    validations:
+      required: true
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before you file
+      options:
+        - label: I checked that the current README and `PRD.md` do not already cover this.
+          required: true
+        - label: This request contains no API key or private repository content.
+          required: true

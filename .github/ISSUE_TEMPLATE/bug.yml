@@ -1,0 +1,75 @@
+name: Bug report
+description: Something in maxcode does not work as documented.
+title: "[bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        A failing check, a wrong exit code, or a crash belongs here.
+        Never paste an API key: maxcode reads keys from the environment only,
+        and a report must not contain one.
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: The command you ran and the output you got.
+      render: text
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What did you expect instead?
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      description: The smallest task, config, and repository that shows the problem.
+      render: text
+    validations:
+      required: true
+  - type: input
+    id: maxcode-version
+    attributes:
+      label: maxcode version
+      description: Output of `maxcode version`.
+    validations:
+      required: true
+  - type: input
+    id: engine
+    attributes:
+      label: Engine
+      description: Output of the engine's `--version`, and whether it came from `MAXCODE_ENGINE_BIN`, `maxcode-engine`, or `codex`.
+    validations:
+      required: true
+  - type: dropdown
+    id: provider
+    attributes:
+      label: Provider
+      description: Which endpoint served the planner and the worker?
+      options:
+        - Local Ollama
+        - Pollinations
+        - Other OpenAI-compatible endpoint
+        - Not sure
+    validations:
+      required: true
+  - type: input
+    id: python
+    attributes:
+      label: Python and OS
+      description: For example, "Python 3.12.4 on Ubuntu 24.04".
+    validations:
+      required: true
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before you file
+      options:
+        - label: I ran `maxcode doctor`.
+          required: true
+        - label: This report contains no API key, token, or private repository content.
+          required: true
