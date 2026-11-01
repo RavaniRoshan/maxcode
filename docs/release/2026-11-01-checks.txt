@@ -1,0 +1,15 @@
+maxcode 0.1.0-alpha.1 — checks run 2026-11-01
+
+$ uv run maxcode version
+maxcode 0.1.0-alpha.1
+
+$ uv run pytest -m "not slow"
+tests/test_worker.py .....                                               [100%]
+
+====================== 166 passed, 1 deselected in 9.01s =======================
+
+$ uv run ruff check .
+All checks passed!
+
+$ uv run mypy src
+Success: no issues found in 22 source files
